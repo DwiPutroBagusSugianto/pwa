@@ -1,0 +1,5 @@
+[
+    { "title": "Belajar PWA", "description": "Membuat aplikasi web yang bisa diinstal." },
+    { "title": "Integrasi Fetch", "description": "Mengambil data dari endpoint JSON." },
+    { "title": "Mastering LocalStorage", "description": "Menyimpan state aplikasi di browser." }
+]

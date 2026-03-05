@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Simple PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90e2">
+
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --dark: #333;
+            --light: #f4f4f4;
+        }
+        body { font-family: sans-serif; margin: 0; background: var(--light); }
+        header { background: var(--primary); color: white; padding: 1rem; text-align: center; }
+
+        /* SPA Navigation */
+        nav { display: flex; justify-content: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        nav a { padding: 1rem; text-decoration: none; color: var(--dark); cursor: pointer; }
+        nav a:hover { background: #eee; }
+
+        .page { display: none; padding: 20px; max-width: 600px; margin: auto; }
+        .page.active { display: block; }
+
+        /* UI Components */
+        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        .sync-status { font-size: 0.8rem; margin-top: 10px; color: #666; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Simple Task Manager</h1>
+</header>
+
+<nav>
+    <a onclick="navigateTo('home')">Beranda</a>
+    <a onclick="navigateTo('tasks')">Daftar Tugas</a>
+</nav>
+
+<section id="home" class="page active">
+    <h2>Selamat Datang</h2>
+    <p>Ini adalah aplikasi SPA & PWA sederhana yang menyimpan data di LocalStorage dan melakukan sinkronisasi via JSON.</p>
+    <div class="card">
+        <h3>Status Sinkronisasi</h3>
+        <button id="syncBtn">Sinkronkan Data Sekarang</button>
+        <p class="sync-status" id="statusMsg">Belum ada data disinkronkan.</p>
+    </div>
+</section>
+
+<section id="tasks" class="page">
+    <h2>Daftar Tugas</h2>
+
+    <div class="card">
+        <h3>Tambah Tugas Manual</h3>
+        <input type="text" id="taskTitle" placeholder="Judul Tugas" style="width: 90%; padding: 8px; margin-bottom: 10px;">
+        <textarea id="taskDesc" placeholder="Deskripsi" style="width: 90%; padding: 8px; margin-bottom: 10px;"></textarea>
+        <button onclick="addTask()">Simpan ke Lokal</button>
+    </div>
+
+    <hr>
+    <div id="taskList">
+        <p>Tidak ada tugas tersedia. Silakan sinkronkan data.</p>
+    </div>
+</section>
+
+<script>
+    // --- 1. SPA Routing Logic ---
+    function navigateTo(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        if(pageId === 'tasks') renderTasks();
+    }
+
+    // --- 2. Data Logic (LocalStorage & Fetch) ---
+    const DB_KEY = 'my_app_tasks';
+    const JSON_URL = 'data.json'; // Pastikan file ini ada di folder yang sama
+
+
+
+
+    async function syncData() {
+    const btn = document.getElementById('syncBtn');
+    const msg = document.getElementById('statusMsg');
+
+    btn.disabled = true;
+    msg.innerText = "Sinkronisasi...";
+
+    try {
+        const response = await fetch(JSON_URL);
+        if (!response.ok) throw new Error('Gagal mengambil file JSON');
+
+        const dataFromServer = await response.json();
+
+        // Ambil data yang sudah ada di lokal saat ini
+        const localData = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+
+        // Logika Merge: Masukkan data dari server hanya jika judulnya belum ada di lokal
+        const mergedData = [...localData];
+
+        dataFromServer.forEach(serverTask => {
+            const isDuplicate = localData.some(localTask => localTask.title === serverTask.title);
+            if (!isDuplicate) {
+                mergedData.push(serverTask);
+            }
+        });
+
+        // Simpan hasil penggabungan kembali ke LocalStorage
+        localStorage.setItem(DB_KEY, JSON.stringify(mergedData));
+
+        msg.innerText = `Terakhir sinkron: ${new Date().toLocaleTimeString()}`;
+        renderTasks();
+        alert('Sinkronisasi berhasil! Data server ditambahkan tanpa menghapus data lokal Anda.');
+
+    } catch (error) {
+        msg.innerText = "Gagal sinkron: " + error.message;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+
+
+    function renderTasks() {
+        const listContainer = document.getElementById('taskList');
+        const rawData = localStorage.getItem(DB_KEY);
+
+        if (!rawData || JSON.parse(rawData).length === 0) {
+            listContainer.innerHTML = '<p>Tidak ada tugas tersedia.</p>';
+            return;
+        }
+
+        const tasks = JSON.parse(rawData);
+        listContainer.innerHTML = tasks.map((task, index) => `
+            <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${task.title}</strong>
+                    <p style="margin: 5px 0 0 0;">${task.description}</p>
+                </div>
+                <button onclick="deleteTask(${index})" style="background: #e74c3c; padding: 5px 10px;">Hapus</button>
+            </div>
+        `).join('');
+    }
+
+    // Fungsi Hapus Tugas
+    function deleteTask(index) {
+        if (confirm('Hapus tugas ini?')) {
+            const tasks = JSON.parse(localStorage.getItem(DB_KEY));
+            tasks.splice(index, 1); // Hapus 1 item berdasarkan index
+            localStorage.setItem(DB_KEY, JSON.stringify(tasks));
+            renderTasks(); // Refresh tampilan
+        }
+    }
+
+    function addTask() {
+    const titleInput = document.getElementById('taskTitle');
+    const descInput = document.getElementById('taskDesc');
+
+    if (titleInput.value === '' || descInput.value === '') {
+        alert('Harap isi semua kolom!');
+        return;
+    }
+
+    const newTask = {
+        title: titleInput.value,
+        description: descInput.value
+    };
+
+    // Ambil data lama dari LocalStorage
+    const rawData = localStorage.getItem(DB_KEY);
+    const tasks = rawData ? JSON.parse(rawData) : [];
+
+    // Tambahkan tugas baru ke array (di posisi paling atas)
+    tasks.unshift(newTask);
+
+    // Simpan kembali ke LocalStorage
+    localStorage.setItem(DB_KEY, JSON.stringify(tasks));
+
+    // Bersihkan form dan refresh tampilan
+    titleInput.value = '';
+    descInput.value = '';
+    renderTasks();
+    alert('Tugas berhasil disimpan di lokal!');
+}
+
+
+    document.getElementById('syncBtn').addEventListener('click', syncData);
+
+    // --- 3. Service Worker Registration (PWA) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW Registered!', reg))
+                .catch(err => console.log('SW Failed!', err));
+        });
+    }
+</script>
+</body>
+</html>
