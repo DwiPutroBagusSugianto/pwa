@@ -1,4 +1,4 @@
-dwi putro bagus sugianto
+Dwi Putro Bagus Sugianto
 
 
-sevti ariyani
+Sevti Ariyani
