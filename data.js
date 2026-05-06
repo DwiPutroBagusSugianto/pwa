@@ -8,9 +8,9 @@ const DB = {
   this.results  = this.results.filter(r => r.quizId !== id);
 },
   users: [
-    { id: 1, name: 'Ahmad Rizky', email: 'admin@edutest.id', password: 'admin123', role: 'admin', department: 'Management', avatar: 'AR' },
-    { id: 2, name: 'Siti Rahma', email: 'siti@edutest.id', password: 'karyawan123', role: 'employee', department: 'HR', avatar: 'SR' },
-    { id: 3, name: 'Budi Santoso', email: 'budi@edutest.id', password: 'karyawan123', role: 'employee', department: 'Engineering', avatar: 'BS' },
+    { id: 1, name: 'Dwi Putro Bagus Sugianto', email: 'dwi@infotama.net.id', password: 'admin123', role: 'admin', department: 'Management', avatar: 'DW' },
+    { id: 2, name: 'Sevti Ariyani', email: 'sevti@infotama.net.id', password: 'sevti123', role: 'admin', department: 'HR', avatar: 'SA' },
+    { id: 3, name: 'Dhika', email: '', password: 'Dhika123', role: 'employee', department: 'NOC', avatar: 'D' },
     { id: 4, name: 'Dewi Lestari', email: 'dewi@edutest.id', password: 'karyawan123', role: 'employee', department: 'Marketing', avatar: 'DL' },
     { id: 5, name: 'Fajar Nugroho', email: 'fajar@edutest.id', password: 'karyawan123', role: 'employee', department: 'Finance', avatar: 'FN' },
     { id: 6, name: 'Hani Putri', email: 'hani@edutest.id', password: 'karyawan123', role: 'employee', department: 'IT', avatar: 'HP' },
