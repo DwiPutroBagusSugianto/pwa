@@ -218,8 +218,8 @@ const App = {
   // ===== EMPLOYEE VIEWS =====
   _employeeDashboard() {
     const u = Auth.currentUser;
-    const assigned = DB.getAssignedQuizzes(u.id);
-    const results = DB.getUserResults(u.id);
+    const assigned = await API.getQuizzes();
+    const results = await API.getMyResults();
     const done = results.length;
     const passed = results.filter(r => r.passed).length;
     const avg = done ? Math.round(results.reduce((s,r) => s+r.score,0) / done) : 0;
@@ -308,7 +308,7 @@ const App = {
 
   _employeeQuizzes() {
     const userId = Auth.currentUser.id;
-    const assigned = DB.getAssignedQuizzes(userId);
+    const assigned = await API.getQuizzes();
 
     return `
     <div class="page-header">
