@@ -512,8 +512,10 @@ quizzes() {
                 </div>`).join('')}
             </div>
           </div>
-          <button class="btn btn-danger btn-sm" onclick="AdminViews.deleteQuestion(${quizId}, ${qu.id})">🗑</button>
-        </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="AdminViews.showEditQuestionForm(${quizId}, ${qu.id})">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="AdminViews.deleteQuestion(${quizId}, ${qu.id})">🗑</button>
+          </div>
       </div>`).join('');
   },
   
@@ -586,6 +588,66 @@ quizzes() {
     document.getElementById('questions-list').innerHTML = this._renderQuestionList(quizId);
     App.notify('Soal berhasil dihapus.', 'success');
   },
+
+  showEditQuestionForm(quizId, questionId) {
+  const q  = DB.getQuiz(quizId);
+  const qu = q.questions.find(x => x.id === questionId);
+
+  App.showModal(`
+    <div class="modal-header">
+      <h3>✏️ Edit Soal</h3>
+      <button class="modal-close" onclick="App.closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Teks Soal</label>
+      <textarea class="form-input" id="edit-q-text" rows="3"
+        style="resize:vertical;">${qu.text}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pilihan Jawaban</label>
+      <input class="form-input" id="edit-opt-0" type="text" value="${qu.options[0]}" style="margin-bottom:6px;"/>
+      <input class="form-input" id="edit-opt-1" type="text" value="${qu.options[1]}" style="margin-bottom:6px;"/>
+      <input class="form-input" id="edit-opt-2" type="text" value="${qu.options[2]}" style="margin-bottom:6px;"/>
+      <input class="form-input" id="edit-opt-3" type="text" value="${qu.options[3]}"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jawaban Benar</label>
+      <select class="form-select" id="edit-correct-opt">
+        <option value="0" ${qu.correct === 0 ? 'selected' : ''}>Pilihan A</option>
+        <option value="1" ${qu.correct === 1 ? 'selected' : ''}>Pilihan B</option>
+        <option value="2" ${qu.correct === 2 ? 'selected' : ''}>Pilihan C</option>
+        <option value="3" ${qu.correct === 3 ? 'selected' : ''}>Pilihan D</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="AdminViews.showQuizDetail(${quizId});setTimeout(()=>AdminViews._quizTab('questions',${quizId}),50)">Batal</button>
+      <button class="btn btn-primary" onclick="AdminViews.saveEditQuestion(${quizId}, ${questionId})">Simpan Perubahan</button>
+    </div>
+  `);
+},
+
+saveEditQuestion(quizId, questionId) {
+  const text    = document.getElementById('edit-q-text').value.trim();
+  const opt0    = document.getElementById('edit-opt-0').value.trim();
+  const opt1    = document.getElementById('edit-opt-1').value.trim();
+  const opt2    = document.getElementById('edit-opt-2').value.trim();
+  const opt3    = document.getElementById('edit-opt-3').value.trim();
+  const correct = parseInt(document.getElementById('edit-correct-opt').value);
+
+  if (!text || !opt0 || !opt1 || !opt2 || !opt3)
+    return App.notify('Semua field wajib diisi!', 'error');
+
+  const q  = DB.getQuiz(quizId);
+  const qu = q.questions.find(x => x.id === questionId);
+
+  qu.text    = text;
+  qu.options = [opt0, opt1, opt2, opt3];
+  qu.correct = correct;
+
+  App.notify('Soal berhasil diperbarui!', 'success');
+  AdminViews.showQuizDetail(quizId);
+  setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+},
 
   toggleAssign(quizId, userId, assign) {
     const q = DB.getQuiz(quizId);
