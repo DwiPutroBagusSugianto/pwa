@@ -191,18 +191,21 @@ const App = {
     document.getElementById('login-password').value = pass;
   },
 
-  doLogin() {
+  async doLogin() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
-    const result = Auth.login(email, password);
-    if (!result.success) {
-      const err = document.getElementById('login-error');
-      err.textContent = result.error;
+    const err = document.getElementById('login-error');
+    err.style.display = 'none';
+  
+    try {
+      const user = await API.login(email, password);
+      Auth.currentUser = user;
+      this.currentPage = 'dashboard';
+      this.render();
+    } catch (e) {
+      err.textContent = e.message || 'Email atau password salah';
       err.style.display = 'block';
-      return;
     }
-    this.currentPage = 'dashboard';
-    this.render();
   },
 
   logout() {
@@ -529,10 +532,14 @@ const App = {
     `);
   },
 
-  _submitQuiz() {
+  async _submitQuiz() {
     QuizEngine.stopTimer();
     const result = QuizEngine.submit();
-    DB.addResult(result);
+    try {
+      await API.submitResult(result);  // simpan ke database
+    } catch(e) {
+      console.error('Gagal simpan hasil:', e.message);
+    }
     this._pageData = result;
     this.currentPage = 'quiz-result';
     this.render();
