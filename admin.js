@@ -485,6 +485,100 @@ quizzes() {
     App.notify(assign ? 'Akses diberikan!' : 'Akses dicabut.', 'success');
   },
 
+    // ---- TAMBAH KUIS ----
+  showAddQuizModal() {
+    App.showModal(`
+      <div class="modal-header">
+        <h3>➕ Tambah Kuis Baru</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Judul Kuis</label>
+        <input class="form-input" id="q-title" type="text" placeholder="Contoh: Leadership Dasar"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi</label>
+        <input class="form-input" id="q-desc" type="text" placeholder="Deskripsi singkat kuis"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <input class="form-input" id="q-category" type="text" placeholder="Contoh: Soft Skills"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon (emoji)</label>
+        <input class="form-input" id="q-icon" type="text" placeholder="Contoh: 📘" maxlength="4"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Durasi (menit)</label>
+        <input class="form-input" id="q-time" type="number" placeholder="Contoh: 15" min="1"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nilai Lulus (%)</label>
+        <input class="form-input" id="q-pass" type="number" placeholder="Contoh: 70" min="1" max="100"/>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="App.closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="AdminViews.addQuiz()">Simpan</button>
+      </div>
+    `);
+  },
+  
+  addQuiz() {
+    const title    = document.getElementById('q-title').value.trim();
+    const desc     = document.getElementById('q-desc').value.trim();
+    const category = document.getElementById('q-category').value.trim();
+    const icon     = document.getElementById('q-icon').value.trim() || '📋';
+    const timeLimit  = parseInt(document.getElementById('q-time').value);
+    const passingScore = parseInt(document.getElementById('q-pass').value);
+  
+    if (!title || !desc || !category || !timeLimit || !passingScore)
+      return App.notify('Semua field wajib diisi!', 'error');
+  
+    const newId = Math.max(...DB.quizzes.map(q => q.id), 0) + 1;
+    DB.quizzes.push({
+      id: newId,
+      title,
+      description: desc,
+      icon,
+      category,
+      timeLimit,
+      passingScore,
+      questions: [],
+      assignedTo: []
+    });
+  
+    App.closeModal();
+    App.notify(`Kuis "${title}" berhasil ditambahkan!`, 'success');
+    App.navigate('quizzes');
+  },
+  
+  // ---- HAPUS KUIS ----
+  confirmDeleteQuiz(id) {
+    const q = DB.getQuiz(id);
+    App.showModal(`
+      <div class="modal-header">
+        <h3>Hapus Kuis</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <p style="color:var(--text-secondary);margin-bottom:24px;">
+        Apakah Anda yakin ingin menghapus kuis <strong style="color:var(--text-primary);">${q.title}</strong>? 
+        Semua data hasil tes terkait akan ikut terhapus.
+      </p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="App.closeModal()">Batal</button>
+        <button class="btn btn-danger" onclick="AdminViews.deleteQuiz(${id})">Ya, Hapus</button>
+      </div>
+    `);
+  },
+  
+  deleteQuiz(id) {
+    DB.quizzes = DB.quizzes.filter(q => q.id !== id);
+    DB.results  = DB.results.filter(r => r.quizId !== id);
+    App.closeModal();
+    App.notify('Kuis berhasil dihapus.', 'success');
+    App.navigate('quizzes');
+  },
+
   // ---- ALL RESULTS ----
   results() {
     const results = [...DB.results].sort((a,b) => new Date(b.date) - new Date(a.date));
