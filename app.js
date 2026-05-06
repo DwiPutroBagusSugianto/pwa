@@ -147,26 +147,26 @@ const App = {
 
           <div class="demo-accounts">
             <h4>Akun Demo</h4>
-            <div class="demo-row" onclick="App.fillLogin('admin@edutest.id','admin123')">
+            <div class="demo-row" onclick="App.fillLogin('dwi@infotama.net.id','admin123')">
               <div class="demo-row-info">
-                <span class="name">Ahmad Rizky</span>
-                <span class="creds">admin@edutest.id / admin123</span>
+                <span class="name">Dwi Putro Bagus Sugianto</span>
+                <span class="creds">dwi@infotama.net.id/ admin123</span>
               </div>
               <span class="badge badge-accent">Admin</span>
             </div>
-            <div class="demo-row" onclick="App.fillLogin('siti@edutest.id','karyawan123')">
+            <div class="demo-row" onclick="App.fillLogin('sevti@infotama.net.id','sevti123')">
               <div class="demo-row-info">
-                <span class="name">Siti Rahma</span>
-                <span class="creds">siti@edutest.id / karyawan123</span>
+                <span class="name">Sevti Ariyani</span>
+                <span class="creds">sevti@infotama.net.id / sevti123</span>
               </div>
               <span class="badge badge-muted">HR</span>
             </div>
-            <div class="demo-row" onclick="App.fillLogin('budi@edutest.id','karyawan123')">
+            <div class="demo-row" onclick="App.fillLogin('dhika@infotama.net.id','karyawan123')">
               <div class="demo-row-info">
-                <span class="name">Budi Santoso</span>
-                <span class="creds">budi@edutest.id / karyawan123</span>
+                <span class="name">Dhika</span>
+                <span class="creds">dhika@infotama.net.id / karyawan123</span>
               </div>
-              <span class="badge badge-muted">Engineering</span>
+              <span class="badge badge-muted">NOC</span>
             </div>
           </div>
 
