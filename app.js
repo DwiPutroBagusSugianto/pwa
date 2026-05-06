@@ -96,7 +96,9 @@ const App = {
     return `
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">🎓</div>
+        <div class="sidebar-logo-icon">
+          <img src="logoilg.jpeg">
+        </div>
         <span>ILG SmartTest</span>
       </div>
       <div class="sidebar-user">
