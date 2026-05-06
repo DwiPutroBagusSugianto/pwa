@@ -97,7 +97,7 @@ const App = {
     <aside class="sidebar">
       <div class="sidebar-logo">
         <div class="sidebar-logo-icon">🎓</div>
-        <span>EduTest</span>
+        <span>ILG SmartTest</span>
       </div>
       <div class="sidebar-user">
         <div class="sidebar-avatar">${u.avatar}</div>
@@ -125,7 +125,7 @@ const App = {
         <div class="login-hero">
           <div class="login-hero-logo">
             <div class="login-hero-logo-icon">🎓</div>
-            <span>EduTest LMS</span>
+            <span>ILG SmartTest</span>
           </div>
           <div class="login-hero-content">
             <h2>Platform Evaluasi <span>Karyawan</span> Modern</h2>
