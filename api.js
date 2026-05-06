@@ -3,7 +3,7 @@
 // Ganti BASE_URL dengan IP/domain VPS kamu
 // ===========================
 
-const API_BASE = 'http://IP_VPS_KAMU/api'; // ← GANTI INI
+const API_BASE = 'http://103.217.218.230/api'; // ← GANTI INI
 
 const API = {
   // ---- TOKEN ----
