@@ -3,6 +3,10 @@
 // ===========================
 
 const DB = {
+  removeQuiz(id) {
+  this.quizzes = this.quizzes.filter(q => q.id !== id);
+  this.results  = this.results.filter(r => r.quizId !== id);
+},
   users: [
     { id: 1, name: 'Ahmad Rizky', email: 'admin@edutest.id', password: 'admin123', role: 'admin', department: 'Management', avatar: 'AR' },
     { id: 2, name: 'Siti Rahma', email: 'siti@edutest.id', password: 'karyawan123', role: 'employee', department: 'HR', avatar: 'SR' },
