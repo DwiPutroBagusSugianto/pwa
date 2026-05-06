@@ -126,7 +126,9 @@ const App = {
       <div class="login-wrap">
         <div class="login-hero">
           <div class="login-hero-logo">
-            <div class="login-hero-logo-icon">🎓</div>
+            <div class="login-hero-logo-icon">
+              <img src="logoilg.jpeg" alt="logo" style="width:32px; height:32px; object-fit:contain;">
+            </div>
             <span>ILG SmartTest</span>
           </div>
           <div class="login-hero-content">
