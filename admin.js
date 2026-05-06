@@ -348,7 +348,11 @@ quizzes() {
           const done = results.length;
           const passRate = done ? Math.round((results.filter(r=>r.passed).length/done)*100) : 0;
           return `
-          <div class="quiz-card" onclick="AdminViews.showQuizDetail(${q.id})">
+          <div class="quiz-card">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();AdminViews.confirmDeleteQuiz(${q.id})">🗑 Hapus</button>
+            </div>
+            <div onclick="AdminViews.showQuizDetail(${q.id})" style="cursor:pointer;">
             <div class="quiz-card-header">
               <div class="quiz-card-icon">${q.icon}</div>
               <span class="badge badge-accent">${q.category}</span>
