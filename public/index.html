@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LMS Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container mt-5">
+
+  <h2 class="text-center mb-4">LMS Quiz System</h2>
+
+  <!-- LOGIN -->
+  <div id="login" class="card p-4 mx-auto" style="max-width:400px;">
+    <h4>Login</h4>
+    <input id="username" class="form-control mb-2" placeholder="Username">
+    <input id="password" type="password" class="form-control mb-3" placeholder="Password">
+    <button class="btn btn-primary w-100" onclick="login()">Login</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display:none" class="text-center">
+    <button class="btn btn-success m-2" onclick="startQuiz()">Mulai Tes</button>
+    <button class="btn btn-info m-2" onclick="loadResults()">Lihat Hasil</button>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" style="display:none" class="card p-4 mt-4">
+    <h4>Admin Panel</h4>
+
+    <input id="soal" class="form-control mb-2" placeholder="Soal">
+    <input id="a" class="form-control mb-2" placeholder="A">
+    <input id="b" class="form-control mb-2" placeholder="B">
+    <input id="c" class="form-control mb-2" placeholder="C">
+    <input id="d" class="form-control mb-2" placeholder="D">
+    <input id="jawaban" class="form-control mb-3" placeholder="Jawaban (A/B/C/D)">
+
+    <button class="btn btn-primary mb-3" onclick="tambahSoal()">Simpan Soal</button>
+
+    <h5>Daftar Soal</h5>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Soal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tableSoal"></tbody>
+    </table>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" style="display:none" class="mt-4">
+    <h4 id="timer" class="text-danger"></h4>
+    <form id="form"></form>
+    <button class="btn btn-danger mt-3" onclick="submitQuiz()">Submit</button>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result" class="mt-4"></div>
+
+  <canvas id="chartNilai" style="max-width:600px;margin:auto;"></canvas>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
