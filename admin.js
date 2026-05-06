@@ -13,14 +13,15 @@ const AdminViews = {
       ? Math.round(DB.results.reduce((s, r) => s + r.score, 0) / totalResults)
       : 0;
 
+quizzes() {
     return `
     <div class="page-header">
       <div class="page-header-left">
-        <h1>Dashboard</h1>
-        <p>Selamat datang, ${Auth.currentUser.name}! Berikut ringkasan sistem.</p>
+        <h1>Manajemen Kuis</h1>
+        <p>${DB.quizzes.length} kuis tersedia dalam sistem.</p>
       </div>
       <div class="page-header-actions">
-        <span class="badge badge-accent">Admin</span>
+        <button class="btn btn-primary" onclick="AdminViews.showAddQuizModal()">+ Tambah Kuis</button>
       </div>
     </div>
     <div class="page-body">
