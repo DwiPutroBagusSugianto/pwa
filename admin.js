@@ -13,15 +13,14 @@ const AdminViews = {
       ? Math.round(DB.results.reduce((s, r) => s + r.score, 0) / totalResults)
       : 0;
 
-quizzes() {
     return `
     <div class="page-header">
       <div class="page-header-left">
-        <h1>Manajemen Kuis</h1>
-        <p>${DB.quizzes.length} kuis tersedia dalam sistem.</p>
+        <h1>Dashboard</h1>
+        <p>Selamat datang, ${Auth.currentUser.name}! Berikut ringkasan sistem.</p>
       </div>
       <div class="page-header-actions">
-        <button class="btn btn-primary" onclick="AdminViews.showAddQuizModal()">+ Tambah Kuis</button>
+        <span class="badge badge-accent">Admin</span>
       </div>
     </div>
     <div class="page-body">
@@ -339,6 +338,9 @@ quizzes() {
         <h1>Manajemen Kuis</h1>
         <p>${DB.quizzes.length} kuis tersedia dalam sistem.</p>
       </div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="AdminViews.showAddQuizModal()">+ Tambah Kuis</button>
+      </div>
     </div>
     <div class="page-body">
       <div class="quiz-grid">
@@ -353,28 +355,29 @@ quizzes() {
               <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();AdminViews.confirmDeleteQuiz(${q.id})">🗑 Hapus</button>
             </div>
             <div onclick="AdminViews.showQuizDetail(${q.id})" style="cursor:pointer;">
-            <div class="quiz-card-header">
-              <div class="quiz-card-icon">${q.icon}</div>
-              <span class="badge badge-accent">${q.category}</span>
-            </div>
-            <div class="quiz-card-title">${q.title}</div>
-            <div class="quiz-card-desc">${q.description}</div>
-            <div class="quiz-card-meta">
-              <div class="quiz-meta-item">
-                <span class="meta-val">${q.questions.length}</span>
-                <span class="meta-lbl">Soal</span>
+              <div class="quiz-card-header">
+                <div class="quiz-card-icon">${q.icon}</div>
+                <span class="badge badge-accent">${q.category}</span>
               </div>
-              <div class="quiz-meta-item">
-                <span class="meta-val">${q.timeLimit}m</span>
-                <span class="meta-lbl">Durasi</span>
-              </div>
-              <div class="quiz-meta-item">
-                <span class="meta-val">${assigned}</span>
-                <span class="meta-lbl">Ditugaskan</span>
-              </div>
-              <div class="quiz-meta-item">
-                <span class="meta-val" style="color:${passRate>=70?'var(--green)':'var(--amber)'};">${done > 0 ? passRate + '%' : '-'}</span>
-                <span class="meta-lbl">Pass Rate</span>
+              <div class="quiz-card-title">${q.title}</div>
+              <div class="quiz-card-desc">${q.description}</div>
+              <div class="quiz-card-meta">
+                <div class="quiz-meta-item">
+                  <span class="meta-val">${q.questions.length}</span>
+                  <span class="meta-lbl">Soal</span>
+                </div>
+                <div class="quiz-meta-item">
+                  <span class="meta-val">${q.timeLimit}m</span>
+                  <span class="meta-lbl">Durasi</span>
+                </div>
+                <div class="quiz-meta-item">
+                  <span class="meta-val">${assigned}</span>
+                  <span class="meta-lbl">Ditugaskan</span>
+                </div>
+                <div class="quiz-meta-item">
+                  <span class="meta-val" style="color:${passRate>=70?'var(--green)':'var(--amber)'};">${done > 0 ? passRate + '%' : '-'}</span>
+                  <span class="meta-lbl">Pass Rate</span>
+                </div>
               </div>
             </div>
           </div>`;
@@ -410,7 +413,7 @@ quizzes() {
     const q = DB.getQuiz(id);
     const body = document.getElementById('quiz-modal-body');
     if (tab === 'info') body.innerHTML = this._quizTabInfo(q);
-    else if (tab === 'questions') body.innerHTML = this._quizTabQuestions(id); // tambah ini
+    else if (tab === 'questions') body.innerHTML = this._quizTabQuestions(id);
     else if (tab === 'results') body.innerHTML = this._quizTabResults(id);
     else body.innerHTML = this._quizTabAssign(id);
   },
@@ -479,7 +482,15 @@ quizzes() {
     </div>`;
   },
 
-    // ---- MANAJEMEN SOAL ----
+  toggleAssign(quizId, userId, assign) {
+    const q = DB.getQuiz(quizId);
+    if (assign && !q.assignedTo.includes(userId)) q.assignedTo.push(userId);
+    else if (!assign) q.assignedTo = q.assignedTo.filter(id => id !== userId);
+    this._quizTab('assign', quizId);
+    App.notify(assign ? 'Akses diberikan!' : 'Akses dicabut.', 'success');
+  },
+
+  // ---- MANAJEMEN SOAL ----
   _quizTabQuestions(quizId) {
     const q = DB.getQuiz(quizId);
     return `
@@ -490,7 +501,7 @@ quizzes() {
       ${this._renderQuestionList(quizId)}
     </div>`;
   },
-  
+
   _renderQuestionList(quizId) {
     const q = DB.getQuiz(quizId);
     if (q.questions.length === 0) {
@@ -516,9 +527,10 @@ quizzes() {
             <button class="btn btn-ghost btn-sm" onclick="AdminViews.showEditQuestionForm(${quizId}, ${qu.id})">✏️ Edit</button>
             <button class="btn btn-danger btn-sm" onclick="AdminViews.deleteQuestion(${quizId}, ${qu.id})">🗑</button>
           </div>
+        </div>
       </div>`).join('');
   },
-  
+
   showAddQuestionForm(quizId) {
     App.showModal(`
       <div class="modal-header">
@@ -527,8 +539,8 @@ quizzes() {
       </div>
       <div class="form-group">
         <label class="form-label">Teks Soal</label>
-        <textarea class="form-input" id="new-q-text" rows="3" 
-          placeholder="Tulis pertanyaan di sini..." 
+        <textarea class="form-input" id="new-q-text" rows="3"
+          placeholder="Tulis pertanyaan di sini..."
           style="resize:vertical;"></textarea>
       </div>
       <div class="form-group">
@@ -553,35 +565,30 @@ quizzes() {
       </div>
     `);
   },
-  
+
   saveQuestion(quizId) {
-    const text = document.getElementById('new-q-text').value.trim();
-    const opt0  = document.getElementById('opt-0').value.trim();
-    const opt1  = document.getElementById('opt-1').value.trim();
-    const opt2  = document.getElementById('opt-2').value.trim();
-    const opt3  = document.getElementById('opt-3').value.trim();
+    const text    = document.getElementById('new-q-text').value.trim();
+    const opt0    = document.getElementById('opt-0').value.trim();
+    const opt1    = document.getElementById('opt-1').value.trim();
+    const opt2    = document.getElementById('opt-2').value.trim();
+    const opt3    = document.getElementById('opt-3').value.trim();
     const correct = parseInt(document.getElementById('correct-opt').value);
-  
+
     if (!text || !opt0 || !opt1 || !opt2 || !opt3)
       return App.notify('Semua field wajib diisi!', 'error');
-  
+
     const q = DB.getQuiz(quizId);
     const newId = q.questions.length > 0
       ? Math.max(...q.questions.map(qu => qu.id)) + 1
       : 1;
-  
-    q.questions.push({
-      id: newId,
-      text,
-      options: [opt0, opt1, opt2, opt3],
-      correct
-    });
-  
+
+    q.questions.push({ id: newId, text, options: [opt0, opt1, opt2, opt3], correct });
+
     App.notify('Soal berhasil ditambahkan!', 'success');
-    AdminViews.showQuizDetail(quizId); // kembali ke detail kuis, buka tab soal
+    AdminViews.showQuizDetail(quizId);
     setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
   },
-  
+
   deleteQuestion(quizId, questionId) {
     const q = DB.getQuiz(quizId);
     q.questions = q.questions.filter(qu => qu.id !== questionId);
@@ -590,74 +597,65 @@ quizzes() {
   },
 
   showEditQuestionForm(quizId, questionId) {
-  const q  = DB.getQuiz(quizId);
-  const qu = q.questions.find(x => x.id === questionId);
-
-  App.showModal(`
-    <div class="modal-header">
-      <h3>✏️ Edit Soal</h3>
-      <button class="modal-close" onclick="App.closeModal()">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Teks Soal</label>
-      <textarea class="form-input" id="edit-q-text" rows="3"
-        style="resize:vertical;">${qu.text}</textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Pilihan Jawaban</label>
-      <input class="form-input" id="edit-opt-0" type="text" value="${qu.options[0]}" style="margin-bottom:6px;"/>
-      <input class="form-input" id="edit-opt-1" type="text" value="${qu.options[1]}" style="margin-bottom:6px;"/>
-      <input class="form-input" id="edit-opt-2" type="text" value="${qu.options[2]}" style="margin-bottom:6px;"/>
-      <input class="form-input" id="edit-opt-3" type="text" value="${qu.options[3]}"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Jawaban Benar</label>
-      <select class="form-select" id="edit-correct-opt">
-        <option value="0" ${qu.correct === 0 ? 'selected' : ''}>Pilihan A</option>
-        <option value="1" ${qu.correct === 1 ? 'selected' : ''}>Pilihan B</option>
-        <option value="2" ${qu.correct === 2 ? 'selected' : ''}>Pilihan C</option>
-        <option value="3" ${qu.correct === 3 ? 'selected' : ''}>Pilihan D</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="AdminViews.showQuizDetail(${quizId});setTimeout(()=>AdminViews._quizTab('questions',${quizId}),50)">Batal</button>
-      <button class="btn btn-primary" onclick="AdminViews.saveEditQuestion(${quizId}, ${questionId})">Simpan Perubahan</button>
-    </div>
-  `);
-},
-
-saveEditQuestion(quizId, questionId) {
-  const text    = document.getElementById('edit-q-text').value.trim();
-  const opt0    = document.getElementById('edit-opt-0').value.trim();
-  const opt1    = document.getElementById('edit-opt-1').value.trim();
-  const opt2    = document.getElementById('edit-opt-2').value.trim();
-  const opt3    = document.getElementById('edit-opt-3').value.trim();
-  const correct = parseInt(document.getElementById('edit-correct-opt').value);
-
-  if (!text || !opt0 || !opt1 || !opt2 || !opt3)
-    return App.notify('Semua field wajib diisi!', 'error');
-
-  const q  = DB.getQuiz(quizId);
-  const qu = q.questions.find(x => x.id === questionId);
-
-  qu.text    = text;
-  qu.options = [opt0, opt1, opt2, opt3];
-  qu.correct = correct;
-
-  App.notify('Soal berhasil diperbarui!', 'success');
-  AdminViews.showQuizDetail(quizId);
-  setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
-},
-
-  toggleAssign(quizId, userId, assign) {
-    const q = DB.getQuiz(quizId);
-    if (assign && !q.assignedTo.includes(userId)) q.assignedTo.push(userId);
-    else if (!assign) q.assignedTo = q.assignedTo.filter(id => id !== userId);
-    this._quizTab('assign', quizId);
-    App.notify(assign ? 'Akses diberikan!' : 'Akses dicabut.', 'success');
+    const q  = DB.getQuiz(quizId);
+    const qu = q.questions.find(x => x.id === questionId);
+    App.showModal(`
+      <div class="modal-header">
+        <h3>✏️ Edit Soal</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teks Soal</label>
+        <textarea class="form-input" id="edit-q-text" rows="3"
+          style="resize:vertical;">${qu.text}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pilihan Jawaban</label>
+        <input class="form-input" id="edit-opt-0" type="text" value="${qu.options[0]}" style="margin-bottom:6px;"/>
+        <input class="form-input" id="edit-opt-1" type="text" value="${qu.options[1]}" style="margin-bottom:6px;"/>
+        <input class="form-input" id="edit-opt-2" type="text" value="${qu.options[2]}" style="margin-bottom:6px;"/>
+        <input class="form-input" id="edit-opt-3" type="text" value="${qu.options[3]}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jawaban Benar</label>
+        <select class="form-select" id="edit-correct-opt">
+          <option value="0" ${qu.correct === 0 ? 'selected' : ''}>Pilihan A</option>
+          <option value="1" ${qu.correct === 1 ? 'selected' : ''}>Pilihan B</option>
+          <option value="2" ${qu.correct === 2 ? 'selected' : ''}>Pilihan C</option>
+          <option value="3" ${qu.correct === 3 ? 'selected' : ''}>Pilihan D</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="AdminViews.showQuizDetail(${quizId});setTimeout(()=>AdminViews._quizTab('questions',${quizId}),50)">Batal</button>
+        <button class="btn btn-primary" onclick="AdminViews.saveEditQuestion(${quizId}, ${questionId})">Simpan Perubahan</button>
+      </div>
+    `);
   },
 
-    // ---- TAMBAH KUIS ----
+  saveEditQuestion(quizId, questionId) {
+    const text    = document.getElementById('edit-q-text').value.trim();
+    const opt0    = document.getElementById('edit-opt-0').value.trim();
+    const opt1    = document.getElementById('edit-opt-1').value.trim();
+    const opt2    = document.getElementById('edit-opt-2').value.trim();
+    const opt3    = document.getElementById('edit-opt-3').value.trim();
+    const correct = parseInt(document.getElementById('edit-correct-opt').value);
+
+    if (!text || !opt0 || !opt1 || !opt2 || !opt3)
+      return App.notify('Semua field wajib diisi!', 'error');
+
+    const q  = DB.getQuiz(quizId);
+    const qu = q.questions.find(x => x.id === questionId);
+
+    qu.text    = text;
+    qu.options = [opt0, opt1, opt2, opt3];
+    qu.correct = correct;
+
+    App.notify('Soal berhasil diperbarui!', 'success');
+    AdminViews.showQuizDetail(quizId);
+    setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+  },
+
+  // ---- TAMBAH KUIS ----
   showAddQuizModal() {
     App.showModal(`
       <div class="modal-header">
@@ -694,36 +692,29 @@ saveEditQuestion(quizId, questionId) {
       </div>
     `);
   },
-  
+
   addQuiz() {
-    const title    = document.getElementById('q-title').value.trim();
-    const desc     = document.getElementById('q-desc').value.trim();
-    const category = document.getElementById('q-category').value.trim();
-    const icon     = document.getElementById('q-icon').value.trim() || '📋';
-    const timeLimit  = parseInt(document.getElementById('q-time').value);
+    const title        = document.getElementById('q-title').value.trim();
+    const desc         = document.getElementById('q-desc').value.trim();
+    const category     = document.getElementById('q-category').value.trim();
+    const icon         = document.getElementById('q-icon').value.trim() || '📋';
+    const timeLimit    = parseInt(document.getElementById('q-time').value);
     const passingScore = parseInt(document.getElementById('q-pass').value);
-  
+
     if (!title || !desc || !category || !timeLimit || !passingScore)
       return App.notify('Semua field wajib diisi!', 'error');
-  
+
     const newId = Math.max(...DB.quizzes.map(q => q.id), 0) + 1;
     DB.quizzes.push({
-      id: newId,
-      title,
-      description: desc,
-      icon,
-      category,
-      timeLimit,
-      passingScore,
-      questions: [],
-      assignedTo: []
+      id: newId, title, description: desc, icon, category,
+      timeLimit, passingScore, questions: [], assignedTo: []
     });
-  
+
     App.closeModal();
     App.notify(`Kuis "${title}" berhasil ditambahkan!`, 'success');
     App.navigate('quizzes');
   },
-  
+
   // ---- HAPUS KUIS ----
   confirmDeleteQuiz(id) {
     const q = DB.getQuiz(id);
@@ -733,7 +724,7 @@ saveEditQuestion(quizId, questionId) {
         <button class="modal-close" onclick="App.closeModal()">✕</button>
       </div>
       <p style="color:var(--text-secondary);margin-bottom:24px;">
-        Apakah Anda yakin ingin menghapus kuis <strong style="color:var(--text-primary);">${q.title}</strong>? 
+        Apakah Anda yakin ingin menghapus kuis <strong style="color:var(--text-primary);">${q.title}</strong>?
         Semua data hasil tes terkait akan ikut terhapus.
       </p>
       <div class="modal-footer">
@@ -742,7 +733,7 @@ saveEditQuestion(quizId, questionId) {
       </div>
     `);
   },
-  
+
   deleteQuiz(id) {
     DB.quizzes = DB.quizzes.filter(q => q.id !== id);
     DB.results  = DB.results.filter(r => r.quizId !== id);
@@ -795,4 +786,5 @@ saveEditQuestion(quizId, questionId) {
       </div>
     </div>`;
   }
+
 };
