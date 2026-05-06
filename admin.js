@@ -393,6 +393,7 @@ quizzes() {
       </div>
       <div class="tabs" style="margin-bottom:20px;">
         <button class="tab-btn active" id="tab-info" onclick="AdminViews._quizTab('info',${id})">Informasi</button>
+        <button class="tab-btn" id="tab-questions" onclick="AdminViews._quizTab('questions',${id})">Soal (${q.questions.length})</button>
         <button class="tab-btn" id="tab-results" onclick="AdminViews._quizTab('results',${id})">Hasil (${results.length})</button>
         <button class="tab-btn" id="tab-assign" onclick="AdminViews._quizTab('assign',${id})">Penugasan</button>
       </div>
@@ -409,6 +410,7 @@ quizzes() {
     const q = DB.getQuiz(id);
     const body = document.getElementById('quiz-modal-body');
     if (tab === 'info') body.innerHTML = this._quizTabInfo(q);
+    else if (tab === 'questions') body.innerHTML = this._quizTabQuestions(id); // tambah ini
     else if (tab === 'results') body.innerHTML = this._quizTabResults(id);
     else body.innerHTML = this._quizTabAssign(id);
   },
@@ -475,6 +477,114 @@ quizzes() {
         </label>`;
       }).join('')}
     </div>`;
+  },
+
+    // ---- MANAJEMEN SOAL ----
+  _quizTabQuestions(quizId) {
+    const q = DB.getQuiz(quizId);
+    return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn btn-primary btn-sm" onclick="AdminViews.showAddQuestionForm(${quizId})">+ Tambah Soal</button>
+    </div>
+    <div id="questions-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+      ${this._renderQuestionList(quizId)}
+    </div>`;
+  },
+  
+  _renderQuestionList(quizId) {
+    const q = DB.getQuiz(quizId);
+    if (q.questions.length === 0) {
+      return `<div class="empty-state"><div class="empty-icon">📝</div><h3>Belum ada soal</h3><p>Klik "Tambah Soal" untuk mulai menambahkan soal.</p></div>`;
+    }
+    return q.questions.map((qu, i) => `
+      <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:0.72rem;color:var(--accent);font-weight:700;margin-bottom:4px;">SOAL ${i+1}</div>
+            <div style="font-size:0.88rem;font-weight:500;margin-bottom:10px;">${qu.text}</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              ${qu.options.map((opt, oi) => `
+                <div style="font-size:0.8rem;padding:4px 8px;border-radius:4px;
+                  background:${oi === qu.correct ? 'rgba(0,200,100,0.1)' : 'transparent'};
+                  color:${oi === qu.correct ? 'var(--green)' : 'var(--text-secondary)'};
+                  border:1px solid ${oi === qu.correct ? 'var(--green)' : 'transparent'};">
+                  ${oi === qu.correct ? '✓' : '○'} ${opt}
+                </div>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="AdminViews.deleteQuestion(${quizId}, ${qu.id})">🗑</button>
+        </div>
+      </div>`).join('');
+  },
+  
+  showAddQuestionForm(quizId) {
+    App.showModal(`
+      <div class="modal-header">
+        <h3>➕ Tambah Soal Baru</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teks Soal</label>
+        <textarea class="form-input" id="new-q-text" rows="3" 
+          placeholder="Tulis pertanyaan di sini..." 
+          style="resize:vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pilihan Jawaban</label>
+        <input class="form-input" id="opt-0" type="text" placeholder="Pilihan A" style="margin-bottom:6px;"/>
+        <input class="form-input" id="opt-1" type="text" placeholder="Pilihan B" style="margin-bottom:6px;"/>
+        <input class="form-input" id="opt-2" type="text" placeholder="Pilihan C" style="margin-bottom:6px;"/>
+        <input class="form-input" id="opt-3" type="text" placeholder="Pilihan D"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jawaban Benar</label>
+        <select class="form-select" id="correct-opt">
+          <option value="0">Pilihan A</option>
+          <option value="1">Pilihan B</option>
+          <option value="2">Pilihan C</option>
+          <option value="3">Pilihan D</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="AdminViews.showQuizDetail(${quizId})">Batal</button>
+        <button class="btn btn-primary" onclick="AdminViews.saveQuestion(${quizId})">Simpan Soal</button>
+      </div>
+    `);
+  },
+  
+  saveQuestion(quizId) {
+    const text = document.getElementById('new-q-text').value.trim();
+    const opt0  = document.getElementById('opt-0').value.trim();
+    const opt1  = document.getElementById('opt-1').value.trim();
+    const opt2  = document.getElementById('opt-2').value.trim();
+    const opt3  = document.getElementById('opt-3').value.trim();
+    const correct = parseInt(document.getElementById('correct-opt').value);
+  
+    if (!text || !opt0 || !opt1 || !opt2 || !opt3)
+      return App.notify('Semua field wajib diisi!', 'error');
+  
+    const q = DB.getQuiz(quizId);
+    const newId = q.questions.length > 0
+      ? Math.max(...q.questions.map(qu => qu.id)) + 1
+      : 1;
+  
+    q.questions.push({
+      id: newId,
+      text,
+      options: [opt0, opt1, opt2, opt3],
+      correct
+    });
+  
+    App.notify('Soal berhasil ditambahkan!', 'success');
+    AdminViews.showQuizDetail(quizId); // kembali ke detail kuis, buka tab soal
+    setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+  },
+  
+  deleteQuestion(quizId, questionId) {
+    const q = DB.getQuiz(quizId);
+    q.questions = q.questions.filter(qu => qu.id !== questionId);
+    document.getElementById('questions-list').innerHTML = this._renderQuestionList(quizId);
+    App.notify('Soal berhasil dihapus.', 'success');
   },
 
   toggleAssign(quizId, userId, assign) {
