@@ -10,10 +10,7 @@ const DB = {
   users: [
     { id: 1, name: 'Dwi Putro Bagus Sugianto', email: 'dwi@infotama.net.id', password: 'admin123', role: 'admin', department: 'Management', avatar: 'DW' },
     { id: 2, name: 'Sevti Ariyani', email: 'sevti@infotama.net.id', password: 'sevti123', role: 'admin', department: 'HR', avatar: 'SA' },
-    { id: 3, name: 'Dhika', email: '', password: 'Dhika123', role: 'employee', department: 'NOC', avatar: 'D' },
-    { id: 4, name: 'Dewi Lestari', email: 'dewi@edutest.id', password: 'karyawan123', role: 'employee', department: 'Marketing', avatar: 'DL' },
-    { id: 5, name: 'Fajar Nugroho', email: 'fajar@edutest.id', password: 'karyawan123', role: 'employee', department: 'Finance', avatar: 'FN' },
-    { id: 6, name: 'Hani Putri', email: 'hani@edutest.id', password: 'karyawan123', role: 'employee', department: 'IT', avatar: 'HP' },
+    { id: 3, name: 'Dhika', email: 'dhika@infotama.net.id', password: 'dhika123', role: 'employee', department: 'NOC', avatar: 'D' },
   ],
 
   quizzes: [
