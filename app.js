@@ -38,25 +38,34 @@ const App = {
     app.innerHTML = `
       <div class="layout">
         ${this._sidebar(isAdmin)}
-        <div class="main-content">
-          ${this._pageContent(isAdmin)}
+        <div class="main-content" id="main-content">
+          <div class="page-loading">Memuat...</div>
         </div>
       </div>`;
+
+    this._loadPageContent(isAdmin);
   },
 
-  _pageContent(isAdmin) {
-    const pg = this.currentPage;
-    if (isAdmin) {
-      if (pg === 'dashboard') return AdminViews.dashboard();
-      if (pg === 'employees') return AdminViews.employees();
-      if (pg === 'quizzes') return AdminViews.quizzes();
-      if (pg === 'results') return AdminViews.results();
-    } else {
-      if (pg === 'dashboard') return this._employeeDashboard();
-      if (pg === 'my-quizzes') return this._employeeQuizzes();
-      if (pg === 'my-results') return this._employeeResults();
+  async _loadPageContent(isAdmin) {
+    const el = document.getElementById('main-content');
+    if (!el) return;
+    try {
+      let html = '';
+      const pg = this.currentPage;
+      if (isAdmin) {
+        if (pg === 'dashboard') html = AdminViews.dashboard();
+        else if (pg === 'employees') html = AdminViews.employees();
+        else if (pg === 'quizzes') html = AdminViews.quizzes();
+        else if (pg === 'results') html = AdminViews.results();
+      } else {
+        if (pg === 'dashboard') html = await this._employeeDashboard();
+        else if (pg === 'my-quizzes') html = await this._employeeQuizzes();
+        else if (pg === 'my-results') html = await this._employeeResults();
+      }
+      el.innerHTML = html || '<div class="page-body"><p>Halaman tidak ditemukan.</p></div>';
+    } catch (err) {
+      el.innerHTML = `<div class="page-body"><p style="color:var(--red);">Gagal memuat halaman: ${err.message}</p></div>`;
     }
-    return '<div class="page-body"><p>Halaman tidak ditemukan.</p></div>';
   },
 
   // ===== SIDEBAR =====
@@ -150,7 +159,7 @@ const App = {
             <div class="demo-row" onclick="App.fillLogin('dwi@infotama.net.id','admin123')">
               <div class="demo-row-info">
                 <span class="name">Dwi Putro Bagus Sugianto</span>
-                <span class="creds">dwi@infotama.net.id/ admin123</span>
+                <span class="creds">dwi@infotama.net.id / admin123</span>
               </div>
               <span class="badge badge-accent">Admin</span>
             </div>
@@ -196,7 +205,7 @@ const App = {
     const password = document.getElementById('login-password').value;
     const err = document.getElementById('login-error');
     err.style.display = 'none';
-  
+
     try {
       const user = await API.login(email, password);
       Auth.currentUser = user;
@@ -216,14 +225,25 @@ const App = {
   },
 
   // ===== EMPLOYEE VIEWS =====
-  _employeeDashboard() {
+  async _employeeDashboard() {
     const u = Auth.currentUser;
-    const assigned = await API.getQuizzes();
-    const results = await API.getMyResults();
+    let assigned = [];
+    let results = [];
+
+    try {
+      assigned = await API.getQuizzes();
+      results = await API.getMyResults();
+    } catch(e) {
+      // fallback ke DB lokal kalau API belum konek
+      assigned = DB.getAssignedQuizzes(u.id);
+      results = DB.getUserResults(u.id);
+    }
+
     const done = results.length;
     const passed = results.filter(r => r.passed).length;
     const avg = done ? Math.round(results.reduce((s,r) => s+r.score,0) / done) : 0;
-    const pending = assigned.filter(q => !DB.getUserQuizResult(u.id, q.id)).length;
+    const completedIds = results.map(r => r.quizId || r.quiz_id);
+    const pending = assigned.filter(q => !completedIds.includes(q.id)).length;
 
     return `
     <div class="page-header">
@@ -271,13 +291,14 @@ const App = {
       <div class="quiz-grid">
         ${assigned.length === 0
           ? '<div class="empty-state"><div class="empty-icon">📭</div><h3>Belum ada kuis</h3><p>Admin belum menugaskan kuis untuk Anda.</p></div>'
-          : assigned.slice(0,3).map(q => this._employeeQuizCard(q)).join('')}
+          : assigned.slice(0,3).map(q => this._employeeQuizCard(q, results)).join('')}
       </div>
     </div>`;
   },
 
-  _employeeQuizCard(q) {
-    const result = DB.getUserQuizResult(Auth.currentUser.id, q.id);
+  _employeeQuizCard(q, results = []) {
+    const completedIds = results.map(r => r.quizId || r.quiz_id);
+    const result = results.find(r => (r.quizId || r.quiz_id) === q.id);
     const done = !!result;
     return `
     <div class="quiz-card" onclick="App.navigate('my-quizzes')">
@@ -291,24 +312,33 @@ const App = {
       <div class="quiz-card-desc">${q.description}</div>
       <div class="quiz-card-meta">
         <div class="quiz-meta-item">
-          <span class="meta-val">${q.questions.length}</span>
+          <span class="meta-val">${q.questions ? q.questions.length : 0}</span>
           <span class="meta-lbl">Soal</span>
         </div>
         <div class="quiz-meta-item">
-          <span class="meta-val">${q.timeLimit}m</span>
+          <span class="meta-val">${q.timeLimit || q.time_limit}m</span>
           <span class="meta-lbl">Waktu</span>
         </div>
         <div class="quiz-meta-item">
-          <span class="meta-val">${q.passingScore}%</span>
+          <span class="meta-val">${q.passingScore || q.passing_score}%</span>
           <span class="meta-lbl">Min. Lulus</span>
         </div>
       </div>
     </div>`;
   },
 
-  _employeeQuizzes() {
+  async _employeeQuizzes() {
     const userId = Auth.currentUser.id;
-    const assigned = await API.getQuizzes();
+    let assigned = [];
+    let results = [];
+
+    try {
+      assigned = await API.getQuizzes();
+      results = await API.getMyResults();
+    } catch(e) {
+      assigned = DB.getAssignedQuizzes(userId);
+      results = DB.getUserResults(userId);
+    }
 
     return `
     <div class="page-header">
@@ -321,7 +351,7 @@ const App = {
       ${assigned.length === 0
         ? '<div class="empty-state"><div class="empty-icon">📭</div><h3>Belum ada kuis</h3><p>Admin belum menugaskan kuis untuk Anda.</p></div>'
         : `<div class="quiz-grid">${assigned.map(q => {
-            const result = DB.getUserQuizResult(userId, q.id);
+            const result = results.find(r => (r.quizId || r.quiz_id) === q.id);
             const done = !!result;
             return `
             <div class="quiz-card">
@@ -335,15 +365,15 @@ const App = {
               <div class="quiz-card-desc">${q.description}</div>
               <div class="quiz-card-meta">
                 <div class="quiz-meta-item">
-                  <span class="meta-val">${q.questions.length}</span>
+                  <span class="meta-val">${q.questions ? q.questions.length : 0}</span>
                   <span class="meta-lbl">Soal</span>
                 </div>
                 <div class="quiz-meta-item">
-                  <span class="meta-val">${q.timeLimit}m</span>
+                  <span class="meta-val">${q.timeLimit || q.time_limit}m</span>
                   <span class="meta-lbl">Waktu</span>
                 </div>
                 <div class="quiz-meta-item">
-                  <span class="meta-val">${q.passingScore}%</span>
+                  <span class="meta-val">${q.passingScore || q.passing_score}%</span>
                   <span class="meta-lbl">Min. Lulus</span>
                 </div>
               </div>
@@ -351,7 +381,7 @@ const App = {
                 ${done
                   ? `<div style="text-align:center;">
                       <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:${result.score>=80?'var(--green)':result.score>=60?'var(--amber)':'var(--red)'};">${result.score}%</div>
-                      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">${result.correctCount} benar · ${result.wrongCount} salah · ${result.skippedCount} skip</div>
+                      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">${result.correctCount || result.correct_count} benar · ${result.wrongCount || result.wrong_count} salah · ${result.skippedCount || result.skipped_count} skip</div>
                       <button class="btn btn-ghost btn-sm btn-full" onclick="App.startQuiz(${q.id})">Ulangi Tes</button>
                     </div>`
                   : `<button class="btn btn-primary btn-full" onclick="App.startQuiz(${q.id})">Mulai Tes →</button>`}
@@ -361,9 +391,17 @@ const App = {
     </div>`;
   },
 
-  _employeeResults() {
+  async _employeeResults() {
     const userId = Auth.currentUser.id;
-    const results = [...DB.getUserResults(userId)].sort((a,b) => new Date(b.date) - new Date(a.date));
+    let results = [];
+
+    try {
+      results = await API.getMyResults();
+    } catch(e) {
+      results = DB.getUserResults(userId);
+    }
+
+    results = [...results].sort((a,b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at));
 
     return `
     <div class="page-header">
@@ -376,20 +414,25 @@ const App = {
       ${results.length === 0
         ? '<div class="empty-state"><div class="empty-icon">📭</div><h3>Belum ada hasil</h3><p>Anda belum mengerjakan kuis apapun.</p></div>'
         : results.map(r => {
-            const q = DB.getQuiz(r.quizId);
-            const sc = r.score; const cls = sc>=80?'high':sc>=60?'mid':'low';
-            const mins = Math.floor(r.timeUsed/60); const secs = r.timeUsed%60;
-            const d = new Date(r.date).toLocaleDateString('id-ID', {day:'2-digit',month:'long',year:'numeric'});
+            const qId = r.quizId || r.quiz_id;
+            const q = DB.getQuiz(qId);
+            const sc = r.score;
+            const mins = Math.floor((r.timeUsed || r.time_used)/60);
+            const secs = (r.timeUsed || r.time_used) % 60;
+            const d = new Date(r.date || r.created_at).toLocaleDateString('id-ID', {day:'2-digit',month:'long',year:'numeric'});
+            const correct = r.correctCount || r.correct_count || 0;
+            const wrong = r.wrongCount || r.wrong_count || 0;
+            const skipped = r.skippedCount || r.skipped_count || 0;
             return `
             <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:20px;">
-              <div style="font-size:2rem;">${q?.icon}</div>
+              <div style="font-size:2rem;">${q?.icon || '📋'}</div>
               <div style="flex:1;">
-                <div style="font-weight:700;margin-bottom:4px;">${q?.title}</div>
+                <div style="font-weight:700;margin-bottom:4px;">${q?.title || 'Kuis'}</div>
                 <div style="font-size:0.8rem;color:var(--text-muted);">${d} · Waktu: ${mins}m ${secs}s</div>
                 <div style="margin-top:8px;display:flex;gap:16px;">
-                  <span style="font-size:0.82rem;color:var(--green);">✓ ${r.correctCount} Benar</span>
-                  <span style="font-size:0.82rem;color:var(--red);">✗ ${r.wrongCount} Salah</span>
-                  ${r.skippedCount > 0 ? `<span style="font-size:0.82rem;color:var(--amber);">⏭ ${r.skippedCount} Skip</span>` : ''}
+                  <span style="font-size:0.82rem;color:var(--green);">✓ ${correct} Benar</span>
+                  <span style="font-size:0.82rem;color:var(--red);">✗ ${wrong} Salah</span>
+                  ${skipped > 0 ? `<span style="font-size:0.82rem;color:var(--amber);">⏭ ${skipped} Skip</span>` : ''}
                 </div>
               </div>
               <div style="text-align:center;">
@@ -481,8 +524,8 @@ const App = {
         </div>
 
         <div class="quiz-nav-buttons">
-          <button class="btn btn-ghost ${idx===0?'':''}
-            " onclick="App._goToQuestion(${idx-1})" ${idx===0?'disabled style="opacity:0.4;cursor:not-allowed;"':''}>
+          <button class="btn btn-ghost" onclick="App._goToQuestion(${idx-1})"
+            ${idx===0?'disabled style="opacity:0.4;cursor:not-allowed;"':''}>
             ← Sebelumnya
           </button>
           <div style="display:flex;gap:10px;">
@@ -524,7 +567,9 @@ const App = {
           <div><div style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;">${total}</div><div style="font-size:0.75rem;color:var(--text-muted);">Total</div></div>
         </div>
       </div>
-      ${unanswered > 0 ? `<p style="color:var(--amber);font-size:0.88rem;margin-bottom:16px;">⚠️ Masih ada <strong>${unanswered} soal</strong> yang belum dijawab. Soal kosong dihitung salah.</p>` : '<p style="color:var(--green);font-size:0.88rem;margin-bottom:16px;">✅ Semua soal telah dijawab. Siap dikumpulkan!</p>'}
+      ${unanswered > 0
+        ? `<p style="color:var(--amber);font-size:0.88rem;margin-bottom:16px;">⚠️ Masih ada <strong>${unanswered} soal</strong> yang belum dijawab. Soal kosong dihitung salah.</p>`
+        : '<p style="color:var(--green);font-size:0.88rem;margin-bottom:16px;">✅ Semua soal telah dijawab. Siap dikumpulkan!</p>'}
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="App.closeModal()">Kembali</button>
         <button class="btn btn-success" onclick="App.closeModal();App._submitQuiz()">Ya, Kumpulkan →</button>
@@ -535,10 +580,11 @@ const App = {
   async _submitQuiz() {
     QuizEngine.stopTimer();
     const result = QuizEngine.submit();
+    DB.addResult(result);
     try {
-      await API.submitResult(result);  // simpan ke database
+      await API.submitResult(result);
     } catch(e) {
-      console.error('Gagal simpan hasil:', e.message);
+      console.error('Gagal simpan hasil ke server:', e.message);
     }
     this._pageData = result;
     this.currentPage = 'quiz-result';
@@ -548,7 +594,6 @@ const App = {
   // ===== RESULT PAGE =====
   _resultPage(result) {
     const quiz = DB.getQuiz(result.quizId);
-    const total = result.correctCount + result.wrongCount + result.skippedCount;
     const sc = result.score;
     const r = 54; const circ = 2 * Math.PI * r;
     const scoreDash = (sc / 100) * circ;
