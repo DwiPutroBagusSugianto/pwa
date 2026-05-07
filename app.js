@@ -205,16 +205,53 @@ const App = {
     const password = document.getElementById('login-password').value;
     const err = document.getElementById('login-error');
     err.style.display = 'none';
-
+  
     try {
       const user = await API.login(email, password);
       Auth.currentUser = user;
+  
+      // ✅ Load data dari API setelah login
+      await this.loadData();
+  
       this.currentPage = 'dashboard';
       this.render();
     } catch (e) {
       err.textContent = e.message || 'Email atau password salah';
       err.style.display = 'block';
     }
+  },
+  
+  // ✅ Fungsi baru — fetch semua data dari API ke DB lokal
+  async loadData() {
+    try {
+      const [users, quizzes] = await Promise.all([
+        API.getUsers(),
+        API.getQuizzes()
+      ]);
+  
+      // Gabung: admin dari DB lokal + employee dari API
+      const admins = DB.users.filter(u => u.role === 'admin');
+      DB.users = [...admins, ...users];
+      DB.quizzes = quizzes;
+  
+      // Load results kalau admin
+      if (Auth.currentUser?.role === 'admin') {
+        DB.results = await API.getResults();
+      }
+    } catch (e) {
+      console.error('Gagal load data dari API:', e.message);
+    }
+  },
+
+    async navigate(page, data) {
+    this.currentPage = page;
+    if (data) this._pageData = data;
+  
+    // ✅ Refresh data setiap pindah halaman admin
+    if (Auth.isAdmin()) await this.loadData();
+  
+    this.render();
+    window.scrollTo(0, 0);
   },
 
   logout() {
