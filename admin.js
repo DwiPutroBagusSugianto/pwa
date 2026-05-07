@@ -1,7 +1,3 @@
-// ===========================
-// ADMIN VIEWS — ILG SmartTest
-// ===========================
-
 const AdminViews = {
 
   // ---- DASHBOARD ----
@@ -252,7 +248,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async addUser() {
     const name     = document.getElementById('new-name').value.trim();
     const email    = document.getElementById('new-email').value.trim();
@@ -325,7 +321,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async deleteUser(id) {
     try {
       await API.deleteUser(id);
@@ -491,7 +487,7 @@ const AdminViews = {
     </div>`;
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async toggleAssign(quizId, userId, assign) {
     try {
       await API.toggleAssign(quizId, userId, assign);
@@ -579,7 +575,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async saveQuestion(quizId) {
     const text    = document.getElementById('new-q-text').value.trim();
     const opt0    = document.getElementById('opt-0').value.trim();
@@ -603,7 +599,7 @@ const AdminViews = {
     }
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async deleteQuestion(quizId, questionId) {
     try {
       await API.deleteQuestion(questionId);
@@ -651,7 +647,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async saveEditQuestion(quizId, questionId) {
     const text    = document.getElementById('edit-q-text').value.trim();
     const opt0    = document.getElementById('edit-opt-0').value.trim();
@@ -716,7 +712,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async addQuiz() {
     const title        = document.getElementById('q-title').value.trim();
     const desc         = document.getElementById('q-desc').value.trim();
@@ -758,7 +754,7 @@ const AdminViews = {
     `);
   },
 
-  // ✅ FIXED: pakai API
+  //pakai API
   async deleteQuiz(id) {
     try {
       await API.deleteQuiz(id);
