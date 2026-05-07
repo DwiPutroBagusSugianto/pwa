@@ -1,5 +1,5 @@
 // ===========================
-// ADMIN VIEWS — EduTest LMS
+// ADMIN VIEWS — ILG SmartTest
 // ===========================
 
 const AdminViews = {
@@ -81,10 +81,8 @@ const AdminViews = {
     const failCount = total - passCount;
     const passRate = total ? Math.round((passCount/total)*100) : 0;
     const failRate = 100 - passRate;
-
     const r = 54; const circ = 2 * Math.PI * r;
     const passDash = (passRate / 100) * circ;
-    const failDash = (failRate / 100) * circ;
 
     return `
     <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -244,7 +242,7 @@ const AdminViews = {
         <label class="form-label">Departemen</label>
         <select class="form-select" id="new-dept">
           <option>HR</option><option>Engineering</option><option>Marketing</option>
-          <option>Finance</option><option>IT</option><option>Operations</option><option>Management</option>
+          <option>Finance</option><option>IT</option><option>Operations</option><option>Management</option><option>NOC</option>
         </select>
       </div>
       <div class="modal-footer">
@@ -254,20 +252,24 @@ const AdminViews = {
     `);
   },
 
-  addUser() {
-    const name = document.getElementById('new-name').value.trim();
-    const email = document.getElementById('new-email').value.trim();
+  // ✅ FIXED: pakai API
+  async addUser() {
+    const name     = document.getElementById('new-name').value.trim();
+    const email    = document.getElementById('new-email').value.trim();
     const password = document.getElementById('new-password').value.trim();
-    const dept = document.getElementById('new-dept').value;
+    const dept     = document.getElementById('new-dept').value;
 
     if (!name || !email || !password) return App.notify('Semua field wajib diisi!', 'error');
-    if (DB.users.find(u => u.email === email)) return App.notify('Email sudah terdaftar!', 'error');
 
-    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    DB.addUser({ name, email, password, role: 'employee', department: dept, avatar: initials });
-    App.closeModal();
-    App.notify(`Karyawan ${name} berhasil ditambahkan!`, 'success');
-    App.navigate('employees');
+    try {
+      const newUser = await API.addUser({ name, email, password, department: dept });
+      DB.users.push(newUser);
+      App.closeModal();
+      App.notify(`Karyawan ${name} berhasil ditambahkan!`, 'success');
+      App.navigate('employees');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menambahkan karyawan!', 'error');
+    }
   },
 
   showEmployeeDetail(id) {
@@ -323,11 +325,18 @@ const AdminViews = {
     `);
   },
 
-  deleteUser(id) {
-    DB.removeUser(id);
-    App.closeModal();
-    App.notify('Karyawan berhasil dihapus.', 'success');
-    App.navigate('employees');
+  // ✅ FIXED: pakai API
+  async deleteUser(id) {
+    try {
+      await API.deleteUser(id);
+      DB.users = DB.users.filter(u => u.id !== id);
+      DB.quizzes.forEach(q => { q.assignedTo = q.assignedTo.filter(uid => uid !== id); });
+      App.closeModal();
+      App.notify('Karyawan berhasil dihapus.', 'success');
+      App.navigate('employees');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menghapus karyawan!', 'error');
+    }
   },
 
   // ---- QUIZZES MANAGEMENT ----
@@ -482,12 +491,18 @@ const AdminViews = {
     </div>`;
   },
 
-  toggleAssign(quizId, userId, assign) {
-    const q = DB.getQuiz(quizId);
-    if (assign && !q.assignedTo.includes(userId)) q.assignedTo.push(userId);
-    else if (!assign) q.assignedTo = q.assignedTo.filter(id => id !== userId);
-    this._quizTab('assign', quizId);
-    App.notify(assign ? 'Akses diberikan!' : 'Akses dicabut.', 'success');
+  // ✅ FIXED: pakai API
+  async toggleAssign(quizId, userId, assign) {
+    try {
+      await API.toggleAssign(quizId, userId, assign);
+      const q = DB.getQuiz(quizId);
+      if (assign && !q.assignedTo.includes(userId)) q.assignedTo.push(userId);
+      else if (!assign) q.assignedTo = q.assignedTo.filter(id => id !== userId);
+      this._quizTab('assign', quizId);
+      App.notify(assign ? 'Akses diberikan!' : 'Akses dicabut.', 'success');
+    } catch (err) {
+      App.notify(err.message || 'Gagal mengubah penugasan!', 'error');
+    }
   },
 
   // ---- MANAJEMEN SOAL ----
@@ -539,9 +554,7 @@ const AdminViews = {
       </div>
       <div class="form-group">
         <label class="form-label">Teks Soal</label>
-        <textarea class="form-input" id="new-q-text" rows="3"
-          placeholder="Tulis pertanyaan di sini..."
-          style="resize:vertical;"></textarea>
+        <textarea class="form-input" id="new-q-text" rows="3" placeholder="Tulis pertanyaan di sini..." style="resize:vertical;"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Pilihan Jawaban</label>
@@ -566,7 +579,8 @@ const AdminViews = {
     `);
   },
 
-  saveQuestion(quizId) {
+  // ✅ FIXED: pakai API
+  async saveQuestion(quizId) {
     const text    = document.getElementById('new-q-text').value.trim();
     const opt0    = document.getElementById('opt-0').value.trim();
     const opt1    = document.getElementById('opt-1').value.trim();
@@ -577,23 +591,29 @@ const AdminViews = {
     if (!text || !opt0 || !opt1 || !opt2 || !opt3)
       return App.notify('Semua field wajib diisi!', 'error');
 
-    const q = DB.getQuiz(quizId);
-    const newId = q.questions.length > 0
-      ? Math.max(...q.questions.map(qu => qu.id)) + 1
-      : 1;
-
-    q.questions.push({ id: newId, text, options: [opt0, opt1, opt2, opt3], correct });
-
-    App.notify('Soal berhasil ditambahkan!', 'success');
-    AdminViews.showQuizDetail(quizId);
-    setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+    try {
+      const newQ = await API.addQuestion(quizId, { text, options: [opt0, opt1, opt2, opt3], correct });
+      const q = DB.getQuiz(quizId);
+      q.questions.push(newQ);
+      App.notify('Soal berhasil ditambahkan!', 'success');
+      AdminViews.showQuizDetail(quizId);
+      setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+    } catch (err) {
+      App.notify(err.message || 'Gagal menambahkan soal!', 'error');
+    }
   },
 
-  deleteQuestion(quizId, questionId) {
-    const q = DB.getQuiz(quizId);
-    q.questions = q.questions.filter(qu => qu.id !== questionId);
-    document.getElementById('questions-list').innerHTML = this._renderQuestionList(quizId);
-    App.notify('Soal berhasil dihapus.', 'success');
+  // ✅ FIXED: pakai API
+  async deleteQuestion(quizId, questionId) {
+    try {
+      await API.deleteQuestion(questionId);
+      const q = DB.getQuiz(quizId);
+      q.questions = q.questions.filter(qu => qu.id !== questionId);
+      document.getElementById('questions-list').innerHTML = this._renderQuestionList(quizId);
+      App.notify('Soal berhasil dihapus.', 'success');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menghapus soal!', 'error');
+    }
   },
 
   showEditQuestionForm(quizId, questionId) {
@@ -606,8 +626,7 @@ const AdminViews = {
       </div>
       <div class="form-group">
         <label class="form-label">Teks Soal</label>
-        <textarea class="form-input" id="edit-q-text" rows="3"
-          style="resize:vertical;">${qu.text}</textarea>
+        <textarea class="form-input" id="edit-q-text" rows="3" style="resize:vertical;">${qu.text}</textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Pilihan Jawaban</label>
@@ -632,7 +651,8 @@ const AdminViews = {
     `);
   },
 
-  saveEditQuestion(quizId, questionId) {
+  // ✅ FIXED: pakai API
+  async saveEditQuestion(quizId, questionId) {
     const text    = document.getElementById('edit-q-text').value.trim();
     const opt0    = document.getElementById('edit-opt-0').value.trim();
     const opt1    = document.getElementById('edit-opt-1').value.trim();
@@ -643,16 +663,19 @@ const AdminViews = {
     if (!text || !opt0 || !opt1 || !opt2 || !opt3)
       return App.notify('Semua field wajib diisi!', 'error');
 
-    const q  = DB.getQuiz(quizId);
-    const qu = q.questions.find(x => x.id === questionId);
-
-    qu.text    = text;
-    qu.options = [opt0, opt1, opt2, opt3];
-    qu.correct = correct;
-
-    App.notify('Soal berhasil diperbarui!', 'success');
-    AdminViews.showQuizDetail(quizId);
-    setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+    try {
+      await API.editQuestion(questionId, { text, options: [opt0, opt1, opt2, opt3], correct });
+      const q  = DB.getQuiz(quizId);
+      const qu = q.questions.find(x => x.id === questionId);
+      qu.text    = text;
+      qu.options = [opt0, opt1, opt2, opt3];
+      qu.correct = correct;
+      App.notify('Soal berhasil diperbarui!', 'success');
+      AdminViews.showQuizDetail(quizId);
+      setTimeout(() => AdminViews._quizTab('questions', quizId), 50);
+    } catch (err) {
+      App.notify(err.message || 'Gagal mengubah soal!', 'error');
+    }
   },
 
   // ---- TAMBAH KUIS ----
@@ -693,7 +716,8 @@ const AdminViews = {
     `);
   },
 
-  addQuiz() {
+  // ✅ FIXED: pakai API
+  async addQuiz() {
     const title        = document.getElementById('q-title').value.trim();
     const desc         = document.getElementById('q-desc').value.trim();
     const category     = document.getElementById('q-category').value.trim();
@@ -704,15 +728,15 @@ const AdminViews = {
     if (!title || !desc || !category || !timeLimit || !passingScore)
       return App.notify('Semua field wajib diisi!', 'error');
 
-    const newId = Math.max(...DB.quizzes.map(q => q.id), 0) + 1;
-    DB.quizzes.push({
-      id: newId, title, description: desc, icon, category,
-      timeLimit, passingScore, questions: [], assignedTo: []
-    });
-
-    App.closeModal();
-    App.notify(`Kuis "${title}" berhasil ditambahkan!`, 'success');
-    App.navigate('quizzes');
+    try {
+      const newQuiz = await API.addQuiz({ title, description: desc, icon, category, timeLimit, passingScore });
+      DB.quizzes.push(newQuiz);
+      App.closeModal();
+      App.notify(`Kuis "${title}" berhasil ditambahkan!`, 'success');
+      App.navigate('quizzes');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menambahkan kuis!', 'error');
+    }
   },
 
   // ---- HAPUS KUIS ----
@@ -734,12 +758,18 @@ const AdminViews = {
     `);
   },
 
-  deleteQuiz(id) {
-    DB.quizzes = DB.quizzes.filter(q => q.id !== id);
-    DB.results  = DB.results.filter(r => r.quizId !== id);
-    App.closeModal();
-    App.notify('Kuis berhasil dihapus.', 'success');
-    App.navigate('quizzes');
+  // ✅ FIXED: pakai API
+  async deleteQuiz(id) {
+    try {
+      await API.deleteQuiz(id);
+      DB.quizzes = DB.quizzes.filter(q => q.id !== id);
+      DB.results  = DB.results.filter(r => r.quizId !== id);
+      App.closeModal();
+      App.notify('Kuis berhasil dihapus.', 'success');
+      App.navigate('quizzes');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menghapus kuis!', 'error');
+    }
   },
 
   // ---- ALL RESULTS ----
@@ -786,5 +816,4 @@ const AdminViews = {
       </div>
     </div>`;
   }
-
 };
