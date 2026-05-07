@@ -1,13 +1,7 @@
-// ===========================
-// API CONNECTOR — ILG SmartTest
-// Ganti BASE_URL dengan IP/domain VPS kamu
-// ===========================
-
 const API_BASE = 'https://smart.infotama.net.id/api'; // ← GANTI INI
 
 const API = {
 
-  // Tambahkan di dalam object API, sebelum getToken()
   _normalize(data) {
     if (Array.isArray(data)) return data.map(d => this._normalize(d));
     if (!data || typeof data !== 'object') return data;
@@ -42,7 +36,7 @@ const API = {
     const res = await fetch(API_BASE + path, opts);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan');
-    return this._normalize(data);  // ✅ normalize di sini
+    return this._normalize(data);
   },
   // ---- TOKEN ----
   getToken() { return localStorage.getItem('token'); },
