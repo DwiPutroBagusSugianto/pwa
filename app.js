@@ -1,7 +1,3 @@
-// ===========================
-// APP CONTROLLER — EduTest LMS
-// ===========================
-
 const App = {
   currentPage: 'login',
   activeQuiz: null,
@@ -210,7 +206,7 @@ const App = {
       const user = await API.login(email, password);
       Auth.currentUser = user;
   
-      // ✅ Load data dari API setelah login
+      //Load data dari API setelah login
       await this.loadData();
   
       this.currentPage = 'dashboard';
@@ -221,7 +217,6 @@ const App = {
     }
   },
   
-  // ✅ Fungsi baru — fetch semua data dari API ke DB lokal
   async loadData() {
     try {
       const [users, quizzes] = await Promise.all([
@@ -247,7 +242,7 @@ const App = {
     this.currentPage = page;
     if (data) this._pageData = data;
   
-    // ✅ Refresh data setiap pindah halaman admin
+    //Refresh data setiap pindah halaman admin
     if (Auth.isAdmin()) await this.loadData();
   
     this.render();
