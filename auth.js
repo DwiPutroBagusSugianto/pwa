@@ -1,20 +1,25 @@
 // ===========================
-// AUTH MODULE — EduTest LMS
+// AUTH MODULE — ILG SmartTest
 // ===========================
-
 const Auth = {
   currentUser: null,
 
-  login(email, password) {
-    const user = DB.users.find(u => u.email === email && u.password === password);
-    if (!user) return { success: false, error: 'Email atau password salah.' };
-    this.currentUser = user;
-    return { success: true, user };
+  async login(email, password) {
+    try {
+      const user = await API.login(email, password);
+      this.currentUser = user;
+      return { success: true, user };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   },
 
-  logout() { this.currentUser = null; },
+  logout() {
+    this.currentUser = null;
+    API.logout();
+  },
 
-  isLoggedIn() { return !!this.currentUser; },
-  isAdmin() { return this.currentUser?.role === 'admin'; },
-  isEmployee() { return this.currentUser?.role === 'employee'; }
+  isLoggedIn()  { return !!this.currentUser && !!API.getToken(); },
+  isAdmin()     { return this.currentUser?.role === 'admin'; },
+  isEmployee()  { return this.currentUser?.role === 'employee'; }
 };
