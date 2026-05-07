@@ -1,7 +1,3 @@
-// ===========================
-// DATA STORE — EduTest LMS
-// ===========================
-
 const DB = {
   users: [
     { id: 1, name: 'Dwi Putro Bagus Sugianto', email: 'dwi@infotama.net.id', password: 'admin123', role: 'admin', department: 'Management', avatar: 'DW' },
