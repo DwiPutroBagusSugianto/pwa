@@ -1,7 +1,3 @@
-// ===========================
-// QUIZ ENGINE — EduTest LMS
-// ===========================
-
 const QuizEngine = {
   activeQuiz: null,
   answers: {},
