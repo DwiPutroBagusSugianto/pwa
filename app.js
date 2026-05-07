@@ -1,3 +1,6 @@
+let _cachedQuizzes = [];
+let _cachedResults = [];
+
 const App = {
   currentPage: 'login',
   activeQuiz: null,
@@ -259,17 +262,15 @@ const App = {
   // ===== EMPLOYEE VIEWS =====
   async _employeeDashboard() {
     const u = Auth.currentUser;
-    let assigned = [];
-    let results = [];
-
     try {
-      assigned = await API.getQuizzes();
-      results = await API.getMyResults();
+      _cachedQuizzes = await API.getQuizzes();
+      _cachedResults = await API.getMyResults();
     } catch(e) {
-      // fallback ke DB lokal kalau API belum konek
-      assigned = DB.getAssignedQuizzes(u.id);
-      results = DB.getUserResults(u.id);
+      _cachedQuizzes = DB.getAssignedQuizzes(u.id);
+      _cachedResults = DB.getUserResults(u.id);
     }
+    const assigned = _cachedQuizzes;
+    const results = _cachedResults;
 
     const done = results.length;
     const passed = results.filter(r => r.passed).length;
@@ -361,16 +362,15 @@ const App = {
 
   async _employeeQuizzes() {
     const userId = Auth.currentUser.id;
-    let assigned = [];
-    let results = [];
-
     try {
-      assigned = await API.getQuizzes();
-      results = await API.getMyResults();
+      _cachedQuizzes = await API.getQuizzes();
+      _cachedResults = await API.getMyResults();
     } catch(e) {
-      assigned = DB.getAssignedQuizzes(userId);
-      results = DB.getUserResults(userId);
+      _cachedQuizzes = DB.getAssignedQuizzes(userId);
+      _cachedResults = DB.getUserResults(userId);
     }
+    const assigned = _cachedQuizzes;
+    const results = _cachedResults;
 
     return `
     <div class="page-header">
@@ -478,8 +478,11 @@ const App = {
 
   // ===== QUIZ TAKING =====
   startQuiz(quizId) {
-    const quiz = DB.getQuiz(quizId);
-    if (!quiz) return;
+    // cari di cache API dulu, fallback ke DB lokal
+    const quiz = _cachedQuizzes.find(q => q.id === quizId) || DB.getQuiz(quizId);
+    if (!quiz) return App.notify('Kuis tidak ditemukan', 'error');
+    // simpan quiz ke DB lokal agar QuizEngine bisa pakai
+    if (!DB.getQuiz(quizId)) DB.quizzes.push(quiz);
     this._pageData = { quizId };
     this.currentPage = 'quiz-take';
     this.render();
