@@ -140,7 +140,7 @@ const App = {
             <span>ILG SmartTest</span>
           </div>
           <div class="login-hero-content">
-            <h2>Platform Evaluasi <span>Karyawan</span> Modern</h2>
+            <h2>Platform Evaluasi <span>Karyawan</span> Infotama</h2>
             <p>Sistem manajemen kuis dan tes terintegrasi untuk mengukur kompetensi karyawan secara efisien dan akurat.</p>
           </div>
           <div class="login-hero-stats">
@@ -169,12 +169,12 @@ const App = {
               </div>
               <span class="badge badge-muted">HR</span>
             </div>
-            <div class="demo-row" onclick="App.fillLogin('dhika@infotama.net.id','karyawan123')">
+            <div class="demo-row" onclick="App.fillLogin('chlea@infotama.net.id','chlea123')">
               <div class="demo-row-info">
-                <span class="name">Dhika</span>
-                <span class="creds">dhika@infotama.net.id / karyawan123</span>
+                <span class="name">Chlea</span>
+                <span class="creds">chlea@infotama.net.id / chlea123</span>
               </div>
-              <span class="badge badge-muted">NOC</span>
+              <span class="badge badge-muted">Finance</span>
             </div>
           </div>
 
