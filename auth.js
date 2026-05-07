@@ -1,6 +1,3 @@
-// ===========================
-// AUTH MODULE — ILG SmartTest
-// ===========================
 const Auth = {
   currentUser: null,
 
