@@ -204,7 +204,6 @@ const App = {
       const user = await API.login(email, password);
       Auth.currentUser = user;
   
-      //Load data dari API setelah login
       await this.loadData();
   
       this.currentPage = 'dashboard';
@@ -273,7 +272,7 @@ const App = {
     <div class="page-header">
       <div class="page-header-left">
         <h1>Halo, ${u.name.split(' ')[0]}! 👋</h1>
-        <p>Semangat belajar hari ini. Berikut ringkasan perkembangan Anda.</p>
+        <p>Semangat Mengerjakan!. Berikut ringkasan Hasil Anda.</p>
       </div>
       <span class="badge badge-muted">${u.department}</span>
     </div>
