@@ -72,8 +72,9 @@ const API = {
 
   // ---- AUTH ----
   async login(email, password) {
-    const data = await this.request('POST', '/login', { email, password });
-    this.setToken(data.token);
+    const data = await this._post('/login', { email, password });
+    this.token = data.token;
+    localStorage.setItem('ilg_token', data.token);
     return data.user;
   },
 
