@@ -1,6 +1,7 @@
 const API_BASE = 'https://smart.infotama.net.id/api'; 
 
 const API = {
+  token: localStorage.getItem('ilg_token') || null,
 
   _normalize(data) {
     if (Array.isArray(data)) return data.map(d => this._normalize(d));
@@ -48,6 +49,16 @@ const API = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.getToken()}`
     };
+  },
+
+  async checkSession() {
+    if (!this.token) return null;
+    try {
+      return await this._get('/me');
+    } catch {
+      this.logout();
+      return null;
+    }
   },
 
   async request(method, path, body = null) {
