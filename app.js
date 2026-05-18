@@ -10,7 +10,7 @@ const App = {
     if (user) {
       Auth.currentUser = user;
       this.currentPage = 'dashboard';
-      await this.loadData(); // ← tambahkan baris ini
+      await this.loadData();
     }
     this.render();
   },
@@ -228,12 +228,9 @@ const App = {
         API.getQuizzes()
       ]);
   
-      // Gabung: admin dari DB lokal + employee dari API
-      const admins = DB.users.filter(u => u.role === 'admin');
-      DB.users = [...admins, ...users];
+      DB.users = users; 
       DB.quizzes = quizzes;
   
-      // Load results kalau admin
       if (Auth.currentUser?.role === 'admin') {
         DB.results = await API.getResults();
       }
@@ -246,7 +243,6 @@ const App = {
     this.currentPage = page;
     if (data) this._pageData = data;
   
-    //Refresh data setiap pindah halaman admin
     if (Auth.isAdmin()) await this.loadData();
   
     this.render();
@@ -479,10 +475,8 @@ const App = {
 
   // ===== QUIZ TAKING =====
   startQuiz(quizId) {
-    // cari di cache API dulu, fallback ke DB lokal
     const quiz = _cachedQuizzes.find(q => q.id === quizId) || DB.getQuiz(quizId);
     if (!quiz) return App.notify('Kuis tidak ditemukan', 'error');
-    // simpan quiz ke DB lokal agar QuizEngine bisa pakai
     if (!DB.getQuiz(quizId)) DB.quizzes.push(quiz);
     this._pageData = { quizId };
     this.currentPage = 'quiz-take';
