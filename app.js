@@ -6,13 +6,13 @@ const App = {
   activeQuiz: null,
 
   async init() {
-  const user = await API.checkSession();
-  if (user) {
-    Auth.currentUser = user;
-    this.currentPage = 'dashboard';
-  }
-  this.render();
-},
+    const user = await API.checkSession();
+    if (user) {
+      Auth.currentUser = user;
+      this.currentPage = 'dashboard';
+    }
+    this.render();
+  },
   navigate(page, data) {
     this.currentPage = page;
     if (data) this._pageData = data;
