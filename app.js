@@ -57,6 +57,7 @@ const App = {
         else if (pg === 'employees') html = AdminViews.employees();
         else if (pg === 'quizzes') html = AdminViews.quizzes();
         else if (pg === 'results') html = AdminViews.results();
+        else if (pg === 'administrators') html = AdminViews.administrators();
       } else {
         if (pg === 'dashboard') html = await this._employeeDashboard();
         else if (pg === 'my-quizzes') html = await this._employeeQuizzes();
@@ -100,7 +101,13 @@ const App = {
       </div>
       <div class="nav-item ${pg==='my-results'?'active':''}" onclick="App.navigate('my-results')">
         <span class="icon">📈</span> Hasil Saya
+      </div>
+      <div class="sidebar-section-label">Sistem</div>
+      <div class="nav-item ${pg==='administrators'?'active':''}" onclick="App.navigate('administrators')">
+        <span class="icon">🔐</span> Administrator
+        <span class="count">${DB.users.filter(u=>u.role==='admin').length}</span>
       </div>`;
+    
 
     return `
     <aside class="sidebar">
