@@ -803,7 +803,7 @@ const AdminViews = {
         </table>
       </div>
     </div>`;
-  }
+  },
 
   administrators() {
     const admins = DB.users.filter(u => u.role === 'admin');
