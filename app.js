@@ -154,6 +154,8 @@ const App = {
           <h3>Masuk ke Akun</h3>
           <p>Gunakan kredensial yang diberikan oleh Admin HR Anda.</p>
 
+          <div class="demo-accounts">
+            <h4>Akun Demo</h4>
             <div class="demo-row" onclick="App.fillLogin('chlea@infotama.net.id','chlea123')">
               <div class="demo-row-info">
                 <span class="name">Chlea</span>
