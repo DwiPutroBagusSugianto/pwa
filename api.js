@@ -43,10 +43,11 @@ const API = {
 
   async login(email, password) {
     const data = await this._post('/login', { email, password });
+    console.log('Response login:', data); // 👈 lihat di DevTools > Console
     this.setToken(data.token);
     return data.user;
-  },
-
+  }
+  
   logout() { this.clearToken(); },
 
   // ---- USERS ----
