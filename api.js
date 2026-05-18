@@ -1,4 +1,4 @@
-const API_BASE = 'https://smart.infotama.net.id/api'; // ← GANTI INI
+const API_BASE = 'https://smart.infotama.net.id/api'; 
 
 const API = {
 
