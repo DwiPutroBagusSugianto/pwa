@@ -154,22 +154,6 @@ const App = {
           <h3>Masuk ke Akun</h3>
           <p>Gunakan kredensial yang diberikan oleh Admin HR Anda.</p>
 
-          <div class="demo-accounts">
-            <h4>Akun Demo</h4>
-            <div class="demo-row" onclick="App.fillLogin('dwi@infotama.net.id','admin123')">
-              <div class="demo-row-info">
-                <span class="name">Dwi Putro Bagus Sugianto</span>
-                <span class="creds">dwi@infotama.net.id / admin123</span>
-              </div>
-              <span class="badge badge-accent">Admin</span>
-            </div>
-            <div class="demo-row" onclick="App.fillLogin('sevti@infotama.net.id','sevti123')">
-              <div class="demo-row-info">
-                <span class="name">Sevti Ariyani</span>
-                <span class="creds">sevti@infotama.net.id / sevti123</span>
-              </div>
-              <span class="badge badge-muted">HR</span>
-            </div>
             <div class="demo-row" onclick="App.fillLogin('chlea@infotama.net.id','chlea123')">
               <div class="demo-row-info">
                 <span class="name">Chlea</span>
