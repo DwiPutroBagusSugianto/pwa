@@ -164,12 +164,12 @@ const App = {
 
           <div class="demo-accounts">
             <h4>Akun Demo</h4>
-            <div class="demo-row" onclick="App.fillLogin('chlea@infotama.net.id','chlea123')">
+            <div class="demo-row" onclick="App.fillLogin('test@infotama.net.id','test123')">
               <div class="demo-row-info">
-                <span class="name">Chlea</span>
-                <span class="creds">chlea@infotama.net.id / chlea123</span>
+                <span class="name">TestSistem</span>
+                <span class="creds">test@infotama.net.id / test123</span>
               </div>
-              <span class="badge badge-muted">Finance</span>
+              <span class="badge badge-muted">Operation</span>
             </div>
           </div>
 
