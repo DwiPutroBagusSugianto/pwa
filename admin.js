@@ -248,7 +248,6 @@ const AdminViews = {
     `);
   },
 
-  //pakai API
   async addUser() {
     const name     = document.getElementById('new-name').value.trim();
     const email    = document.getElementById('new-email').value.trim();
@@ -321,7 +320,6 @@ const AdminViews = {
     `);
   },
 
-  //pakai API
   async deleteUser(id) {
     try {
       await API.deleteUser(id);
@@ -486,8 +484,7 @@ const AdminViews = {
       }).join('')}
     </div>`;
   },
-
-  //pakai API
+  
   async toggleAssign(quizId, userId, assign) {
     try {
       await API.toggleAssign(quizId, userId, assign);
@@ -575,7 +572,6 @@ const AdminViews = {
     `);
   },
 
-  //pakai API
   async saveQuestion(quizId) {
     const text    = document.getElementById('new-q-text').value.trim();
     const opt0    = document.getElementById('opt-0').value.trim();
@@ -599,7 +595,6 @@ const AdminViews = {
     }
   },
 
-  //pakai API
   async deleteQuestion(quizId, questionId) {
     try {
       await API.deleteQuestion(questionId);
@@ -647,7 +642,6 @@ const AdminViews = {
     `);
   },
 
-  //pakai API
   async saveEditQuestion(quizId, questionId) {
     const text    = document.getElementById('edit-q-text').value.trim();
     const opt0    = document.getElementById('edit-opt-0').value.trim();
@@ -754,7 +748,6 @@ const AdminViews = {
     `);
   },
 
-  //pakai API
   async deleteQuiz(id) {
     try {
       await API.deleteQuiz(id);
@@ -768,7 +761,6 @@ const AdminViews = {
     }
   },
 
-  // ---- ALL RESULTS ----
   results() {
     const results = [...DB.results].sort((a,b) => new Date(b.date) - new Date(a.date));
     return `
@@ -812,4 +804,222 @@ const AdminViews = {
       </div>
     </div>`;
   }
+
+  administrators() {
+    const admins = DB.users.filter(u => u.role === 'admin');
+    const currentUserId = Auth.currentUser.id;
+
+    return `
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Manajemen Administrator</h1>
+        <p>${admins.length} administrator terdaftar dalam sistem.</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="AdminViews.showAddAdminModal()">+ Tambah Admin</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Daftar Administrator</h3>
+          <div class="table-search">
+            <span>🔍</span>
+            <input type="text" placeholder="Cari admin..."
+              id="admin-search"
+              oninput="AdminViews.filterAdmins(this.value)"/>
+          </div>
+        </div>
+        <table id="admins-table">
+          <thead><tr>
+            <th>Nama</th><th>Email</th><th>Departemen</th><th>Status</th><th>Aksi</th>
+          </tr></thead>
+          <tbody id="admins-body">
+            ${this._adminRows(admins, currentUserId)}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:24px;border-left:3px solid var(--accent);">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="font-size:1.3rem;">⚠️</span>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;margin-bottom:4px;">Catatan Keamanan</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+              Administrator memiliki akses penuh ke seluruh sistem termasuk data karyawan, kuis, dan hasil tes.
+              Pastikan hanya memberikan akses admin kepada personel yang berwenang.
+              Akun admin yang sedang aktif (Anda) tidak dapat dihapus sendiri.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  _adminRows(admins, currentUserId) {
+    if (admins.length === 0) {
+      return `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">Tidak ada administrator.</td></tr>`;
+    }
+    return admins.map(u => {
+      const isSelf = u.id === currentUserId;
+      return `<tr data-id="${u.id}">
+        <td>
+          <div class="avatar-cell">
+            <div class="avatar-mini">${u.avatar}</div>
+            <div>
+              <strong>${u.name}</strong>
+              ${isSelf ? '<span class="badge badge-accent" style="margin-left:6px;">Anda</span>' : ''}
+            </div>
+          </div>
+        </td>
+        <td style="color:var(--text-secondary);font-size:0.85rem;">${u.email}</td>
+        <td><span class="badge badge-muted">${u.department || 'Management'}</span></td>
+        <td><span class="badge badge-green">Aktif</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            ${isSelf
+              ? `<button class="btn btn-ghost btn-sm" disabled title="Tidak bisa menghapus akun sendiri"
+                  style="opacity:0.4;cursor:not-allowed;">Hapus</button>`
+              : `<button class="btn btn-danger btn-sm" onclick="AdminViews.confirmDeleteAdmin(${u.id})">Hapus</button>`
+            }
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  },
+
+  filterAdmins(q) {
+    const admins = DB.users.filter(u => u.role === 'admin');
+    const filtered = q
+      ? admins.filter(u =>
+          u.name.toLowerCase().includes(q.toLowerCase()) ||
+          u.email.toLowerCase().includes(q.toLowerCase()))
+      : admins;
+    document.getElementById('admins-body').innerHTML =
+      this._adminRows(filtered, Auth.currentUser.id);
+  },
+
+  showAddAdminModal() {
+    App.showModal(`
+      <div class="modal-header">
+        <h3>➕ Tambah Administrator Baru</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+
+      <div style="background:rgba(var(--accent-rgb,99,102,241),0.08);border:1px solid rgba(var(--accent-rgb,99,102,241),0.2);
+        border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:18px;
+        display:flex;gap:10px;align-items:flex-start;">
+        <span>🔐</span>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin:0;line-height:1.5;">
+          Administrator baru akan memiliki akses penuh ke semua fitur sistem.
+          Pastikan data yang dimasukkan sudah benar.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap</label>
+        <input class="form-input" id="new-admin-name" type="text" placeholder="Contoh: Budi Santoso"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="new-admin-email" type="email" placeholder="budi@perusahaan.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="new-admin-password" type="password" placeholder="Minimal 6 karakter"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Konfirmasi Password</label>
+        <input class="form-input" id="new-admin-confirm" type="password" placeholder="Ulangi password"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Departemen</label>
+        <select class="form-select" id="new-admin-dept">
+          <option>Management</option>
+          <option>HR</option>
+          <option>IT</option>
+          <option>Engineering</option>
+          <option>Operations</option>
+          <option>Finance</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="App.closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="AdminViews.addAdmin()">Simpan Admin</button>
+      </div>
+    `);
+  },
+
+  async addAdmin() {
+    const name     = document.getElementById('new-admin-name').value.trim();
+    const email    = document.getElementById('new-admin-email').value.trim();
+    const password = document.getElementById('new-admin-password').value.trim();
+    const confirm  = document.getElementById('new-admin-confirm').value.trim();
+    const dept     = document.getElementById('new-admin-dept').value;
+
+    if (!name || !email || !password || !confirm)
+      return App.notify('Semua field wajib diisi!', 'error');
+
+    if (password !== confirm)
+      return App.notify('Password dan konfirmasi tidak cocok!', 'error');
+
+    if (password.length < 6)
+      return App.notify('Password minimal 6 karakter!', 'error');
+
+    // Cek duplikat email
+    const duplicate = DB.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (duplicate)
+      return App.notify('Email sudah digunakan oleh akun lain!', 'error');
+
+    try {
+      const newAdmin = await API.addUser({
+        name,
+        email,
+        password,
+        department: dept,
+        role: 'admin'  
+      });
+      DB.users.push(newAdmin);
+      App.closeModal();
+      App.notify(`Administrator ${name} berhasil ditambahkan!`, 'success');
+      App.navigate('administrators');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menambahkan administrator!', 'error');
+    }
+  },
+
+  confirmDeleteAdmin(id) {
+    const u = DB.getUser(id);
+    App.showModal(`
+      <div class="modal-header">
+        <h3>Hapus Administrator</h3>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <p style="color:var(--text-secondary);margin-bottom:24px;">
+        Apakah Anda yakin ingin menghapus administrator
+        <strong style="color:var(--text-primary);">${u.name}</strong>?
+        Akun ini tidak akan bisa login lagi setelah dihapus.
+      </p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="App.closeModal()">Batal</button>
+        <button class="btn btn-danger" onclick="AdminViews.deleteAdmin(${id})">Ya, Hapus</button>
+      </div>
+    `);
+  },
+
+  async deleteAdmin(id) {
+    if (id === Auth.currentUser.id) {
+      return App.notify('Anda tidak dapat menghapus akun sendiri!', 'error');
+    }
+    try {
+      await API.deleteUser(id);
+      DB.users = DB.users.filter(u => u.id !== id);
+      App.closeModal();
+      App.notify('Administrator berhasil dihapus.', 'success');
+      App.navigate('administrators');
+    } catch (err) {
+      App.notify(err.message || 'Gagal menghapus administrator!', 'error');
+    }
+  },
 };
