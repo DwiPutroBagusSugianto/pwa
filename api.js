@@ -2,7 +2,6 @@ const API_BASE = 'https://smart.infotama.net.id/api';
 
 const API = {
 
-  // ---- NORMALIZE ----
   _normalize(data) {
     if (Array.isArray(data)) return data.map(d => this._normalize(d));
     if (!data || typeof data !== 'object') return data;
@@ -27,7 +26,6 @@ const API = {
   setToken(t)  { localStorage.setItem('ilg_token', t); this.token = t; },
   clearToken() { localStorage.removeItem('ilg_token'); this.token = null; },
 
-  // ---- HEADERS ----
   headers() {
     return {
       'Content-Type': 'application/json',
@@ -35,7 +33,6 @@ const API = {
     };
   },
 
-  // ---- REQUEST (satu saja) ----
   async request(method, path, body = null) {
     const opts = { method, headers: this.headers() };
     if (body) opts.body = JSON.stringify(body);
@@ -45,27 +42,24 @@ const API = {
     return this._normalize(data);
   },
 
-  // ---- SHORTCUT (INI YANG HILANG) ----
   _get(path)        { return this.request('GET', path); },
   _post(path, body) { return this.request('POST', path, body); },
 
-  // ---- SESSION (persist login saat refresh) ----
   async checkSession() {
     const token = this.getToken();
-    if (!token) return null;        // tidak ada token → langsung null
-    this.token = token;             // restore token ke memory
+    if (!token) return null;       
+    this.token = token;      
     try {
-      return await this._get('/me'); // validasi ke server
+      return await this._get('/me'); 
     } catch {
       this.clearToken();
       return null;
     }
   },
 
-  // ---- AUTH ----
   async login(email, password) {
     const data = await this._post('/login', { email, password });
-    this.setToken(data.token);      // simpan ke localStorage + memory
+    this.setToken(data.token);    
     return data.user;
   },
   logout() { this.clearToken(); },
