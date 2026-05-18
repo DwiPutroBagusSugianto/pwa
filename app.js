@@ -13,12 +13,6 @@ const App = {
     }
     this.render();
   },
-  navigate(page, data) {
-    this.currentPage = page;
-    if (data) this._pageData = data;
-    this.render();
-    window.scrollTo(0, 0);
-  },
 
   render() {
     const app = document.getElementById('app');
