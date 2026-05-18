@@ -10,10 +10,11 @@ const App = {
     if (user) {
       Auth.currentUser = user;
       this.currentPage = 'dashboard';
+      await this.loadData(); // ← tambahkan baris ini
     }
     this.render();
   },
-
+  
   render() {
     const app = document.getElementById('app');
     if (!Auth.isLoggedIn()) {
