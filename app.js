@@ -89,6 +89,12 @@ const App = {
       </div>
       <div class="nav-item ${pg==='results'?'active':''}" onclick="App.navigate('results')">
         <span class="icon">🏆</span> Hasil Tes
+      </div>
+      
+      <div class="sidebar-section-label">Sistem</div>
+      <div class="nav-item ${pg==='administrators'?'active':''}" onclick="App.navigate('administrators')">
+        <span class="icon">🔐</span> Administrator
+        <span class="count">${DB.users.filter(u=>u.role==='admin').length}</span>
       </div>`;
 
     const employeeNav = `
@@ -101,11 +107,6 @@ const App = {
       </div>
       <div class="nav-item ${pg==='my-results'?'active':''}" onclick="App.navigate('my-results')">
         <span class="icon">📈</span> Hasil Saya
-      </div>
-      <div class="sidebar-section-label">Sistem</div>
-      <div class="nav-item ${pg==='administrators'?'active':''}" onclick="App.navigate('administrators')">
-        <span class="icon">🔐</span> Administrator
-        <span class="count">${DB.users.filter(u=>u.role==='admin').length}</span>
       </div>`;
     
 
