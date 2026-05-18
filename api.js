@@ -46,7 +46,7 @@ const API = {
     console.log('Response login:', data); // 👈 lihat di DevTools > Console
     this.setToken(data.token);
     return data.user;
-  }
+  },
   
   logout() { this.clearToken(); },
 
