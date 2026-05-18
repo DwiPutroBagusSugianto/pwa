@@ -5,8 +5,14 @@ const App = {
   currentPage: 'login',
   activeQuiz: null,
 
-  init() { this.render(); },
-
+  async init() {
+  const user = await API.checkSession();
+  if (user) {
+    Auth.currentUser = user;
+    this.currentPage = 'dashboard';
+  }
+  this.render();
+},
   navigate(page, data) {
     this.currentPage = page;
     if (data) this._pageData = data;
