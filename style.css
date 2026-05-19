@@ -723,18 +723,182 @@ tbody tr:hover td { background: var(--bg-elevated); }
 /* ===========================
    RESPONSIVE
    =========================== */
+cat > /mnt/user-data/outputs/style-mobile.css << 'EOF'
+/* ===== TABLET ===== */
 @media (max-width: 768px) {
   .login-wrap { grid-template-columns: 1fr; }
   .login-hero { display: none; }
-  .sidebar { width: 220px; }
-  .main-content { margin-left: 220px; }
-  .page-header, .page-body { padding-left: 20px; padding-right: 20px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0;
+  }
+
+  .sidebar-logo,
+  .sidebar-user,
+  .sidebar-footer,
+  .sidebar-section-label { display: none; }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .nav-item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 8px;
+    border-radius: 0;
+    font-size: 0.7rem;
+    min-width: 60px;
+    flex: 1;
+    margin-bottom: 0;
+    border: none !important;
+  }
+
+  .nav-item .icon { font-size: 1.3rem; width: auto; }
+  .nav-item .count { display: none; }
+
+  .nav-item.active {
+    background: transparent;
+    color: var(--accent);
+    border-top: 2px solid var(--accent) !important;
+  }
+
+  /* Tombol logout di navbar bawah */
+  .sidebar-footer {
+    display: flex !important;
+    padding: 0;
+    border: none;
+    flex: 1;
+  }
+
+  .logout-btn {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 8px;
+    border-radius: 0;
+    font-size: 0.7rem;
+    min-width: 60px;
+    flex: 1;
+    width: 100%;
+  }
+
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 70px; /* space untuk navbar bawah */
+    padding-bottom: 0;
+  }
+
+  .page-header {
+    padding: 20px 16px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+  }
+
+  .page-header-left h1 { font-size: 1.4rem; }
+  .page-header-actions { width: 100%; }
+
+  .page-body { padding: 16px; }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-card { padding: 16px; }
+  .stat-value { font-size: 1.6rem; }
+
+  .quiz-grid { grid-template-columns: 1fr; gap: 14px; }
+
   .detail-grid { grid-template-columns: 1fr; }
+
+  .table-wrap { border-radius: var(--radius-md); overflow-x: auto; }
+  .table-header {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .table-search input { width: 150px; }
+
+  thead th { padding: 10px 12px; font-size: 0.65rem; }
+  tbody td { padding: 12px 12px; font-size: 0.82rem; }
+
+  .score-bar-wrap { max-width: 100px; }
+
+  /* Login mobile */
+  .login-page { padding: 0; align-items: flex-end; }
+  .login-wrap {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-width: 100%;
+    min-height: 85vh;
+  }
+  .login-form-wrap { padding: 32px 24px 40px; }
+
+  /* Quiz screen mobile */
+  .quiz-topbar {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .quiz-topbar-left { flex-wrap: wrap; gap: 8px; }
+  .quiz-progress-bar { width: 120px; }
+  .quiz-body { padding: 20px 16px; }
+  .question-card { padding: 20px 16px; }
+  .question-text { font-size: 1rem; }
+  .question-nav { gap: 6px; }
+  .q-nav-btn { width: 32px; height: 32px; font-size: 0.75rem; }
+
+  /* Result mobile */
+  .result-screen { padding: 20px 16px 80px; }
+  .result-card { padding: 28px 20px; }
+  .result-stats { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Modal mobile */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-width: 100%;
+    max-height: 85vh;
+    padding: 24px 20px;
+  }
+
+  /* Dashboard grid */
+  div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
-@media (max-width: 600px) {
-  .sidebar { display: none; }
-  .main-content { margin-left: 0; }
-  .result-stats { grid-template-columns: 1fr; }
+/* ===== SMALL MOBILE (< 400px) ===== */
+@media (max-width: 400px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-value { font-size: 1.4rem; }
+  .page-header-left h1 { font-size: 1.2rem; }
+  .btn-lg { padding: 12px 20px; font-size: 0.95rem; }
+  .quiz-timer { font-size: 0.95rem; padding: 6px 12px; }
 }
+EOF
