@@ -18,10 +18,6 @@
 
 | Nama | Email | Password | Peran |
 |------|-------|----------|-------|
-| Ahmad Rizky | admin@edutest.id | admin123 | Admin |
-| Siti Rahma | siti@edutest.id | karyawan123 | Karyawan (HR) |
-| Budi Santoso | budi@edutest.id | karyawan123 | Karyawan (Engineering) |
-| Dewi Lestari | dewi@edutest.id | karyawan123 | Karyawan (Marketing) |
-| Fajar Nugroho | fajar@edutest.id | karyawan123 | Karyawan (Finance) |
+| TestSistem | test@infotama.net.id | test123 | Operation |
 
 > Dibuat untuk keperluan edukasi & pengembangan sistem LMS internal perusahaan.
