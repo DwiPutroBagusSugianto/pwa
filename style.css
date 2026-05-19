@@ -788,25 +788,48 @@ tbody tr:hover td { background: var(--bg-elevated); }
   /* --- LOGIN --- */
   .login-page {
     padding: 0;
-    align-items: flex-end;
+    align-items: flex-start;  /* ubah dari flex-end */
   }
   .login-wrap {
     grid-template-columns: 1fr;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl); /* ubah radius */
     max-width: 100%;
-    min-height: 88vh;
-    min-height: 88dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     border-left: none;
     border-right: none;
-    border-bottom: none;
+    border-top: none;
   }
-  .login-hero { display: none; }
+
+  /* HAPUS: .login-hero { display: none; } */
+  /* GANTI dengan ini: */
+  .login-hero {
+    display: flex;
+    padding: 28px 24px 24px;
+    min-height: auto;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+  .login-hero-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  .login-hero-content p {
+    font-size: 0.82rem;
+    display: none; /* sembunyikan deskripsi panjang di HP */
+  }
+  .login-hero-stats {
+    gap: 16px;
+    padding-top: 16px;
+  }
+  .login-stat-item .val {
+    font-size: 1.2rem;
+  }
+
   .login-form-wrap {
-    padding: 36px 24px;
-    padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px));
+    padding: 28px 24px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   }
   .login-form-wrap h3 { font-size: 1.4rem; }
-
   /* --- SIDEBAR → BOTTOM NAV BAR --- */
   .sidebar {
     width: 100%;
