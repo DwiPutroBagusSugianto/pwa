@@ -1,7 +1,7 @@
 // sw.js — ILG SmartTest offline support
 // Taruh file ini di root repo (sejajar dengan index.html), lalu daftarkan di index.html.
 
-const CACHE_NAME = 'ilg-smarttest-v2';
+const CACHE_NAME = 'ilg-smarttest-v1.1';
 const API_BASE = 'https://smart.infotama.net.id/api';
 const DB_NAME = 'ilg-smarttest-offline';
 const QUEUE_STORE = 'pending-results';
