@@ -1033,6 +1033,82 @@ tbody tr:hover td { background: var(--bg-elevated); }
   }
 }
 
+/* ===== Hamburger Menu — ILG SmartTest ===== */
+#hb-toggle {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(20, 18, 40, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+#hb-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+#hb-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+#hb-toggle.open span:nth-child(2) { opacity: 0; }
+#hb-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+#hb-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#hb-backdrop.show { opacity: 1; pointer-events: auto; }
+
+#hb-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 260px;
+  max-width: 78vw;
+  background: #14121f;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 999;
+  transform: translateX(-100%);
+  transition: transform 0.28s ease;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+#hb-drawer.open { transform: translateX(0); }
+
+.hb-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px 20px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 700;
+}
+.hb-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+
+#hb-menu-list { list-style: none; margin: 0; padding: 10px 0; }
+#hb-menu-list li a {
+  display: block;
+  padding: 13px 20px;
+  
 /* ===== SMALL MOBILE (max 400px) ===== */
 @media (max-width: 400px) {
   .stats-grid { gap: 8px; }
