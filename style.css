@@ -1104,10 +1104,21 @@ tbody tr:hover td { background: var(--bg-elevated); }
 }
 .hb-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
 
-#hb-menu-list { list-style: none; margin: 0; padding: 10px 0; }
 #hb-menu-list li a {
   display: block;
   padding: 13px 20px;
+  color: #d8d6f0;
+  text-decoration: none;
+  font-size: 15px;
+}
+#hb-menu-list li a:hover,
+#hb-menu-list li a:active {
+  background: rgba(109, 91, 208, 0.18);
+  color: #fff;
+}
+
+/* ===== SMALL MOBILE (max 400px) ===== */
+@media (max-width: 400px) {
   
 /* ===== SMALL MOBILE (max 400px) ===== */
 @media (max-width: 400px) {
