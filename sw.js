@@ -1,6 +1,6 @@
 // sw.js — ILG SmartTest offline support
 
-const CACHE_NAME = 'ilg-smarttest-v1.9';
+const CACHE_NAME = 'ilg-smarttest-v1.10';
 const API_BASE = 'https://smart.infotama.net.id/api';
 const DB_NAME = 'ilg-smarttest-offline';
 const QUEUE_STORE = 'pending-results';
