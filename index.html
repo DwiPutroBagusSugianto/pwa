@@ -98,8 +98,7 @@
         drawer.classList.contains('open') ? closeDrawer() : openDrawer();
       });
       backdrop.addEventListener('click', closeDrawer);
- 
-      buildMenu();
+
       function updateVisibility() {
         var loggedIn = !!document.querySelector('#app .sidebar');
         toggleBtn.classList.toggle('visible', loggedIn);
@@ -111,6 +110,8 @@
         new MutationObserver(updateVisibility).observe(appEl, { childList: true, subtree: true });
       }
       updateVisibility(); // cek langsung saat pertama load
+ 
+      buildMenu();
     })();
   </script>
  
