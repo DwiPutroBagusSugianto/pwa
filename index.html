@@ -71,7 +71,7 @@
       // Cari elemen nav yang SUDAH dirender oleh bundle1.min.js berdasarkan
       // teksnya, lalu "klik" elemen itu — supaya routing SPA yang sudah ada tetap dipakai.
       function triggerExistingNav(matchText) {
-        var candidates = document.querySelectorAll('#app button, #app a, #app [role="button"]');
+        var candidates = document.querySelectorAll('#app button, #app a, #app [role="button"], #app .nav-item, #app .logout-btn');
         for (var i = 0; i < candidates.length; i++) {
           var el = candidates[i];
           if (el.closest('#hb-overlay')) continue;
