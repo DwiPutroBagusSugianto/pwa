@@ -782,11 +782,7 @@ tbody tr:hover td { background: var(--bg-elevated); }
   gap: 5px;
   cursor: pointer;
 }
-
-/* Hamburger cuma untuk mobile — di desktop sidebar sudah selalu kelihatan */
-@media (max-width: 768px) {
-  #hb-toggle.visible { display: flex; }
-}
+#hb-toggle.visible { display: flex; }
 #hb-toggle span {
   display: block;
   width: 20px;
@@ -827,6 +823,22 @@ tbody tr:hover td { background: var(--bg-elevated); }
   padding-top: 20px;
 }
 #hb-drawer.open { transform: translateX(0); }
+/* ===== SIDEBAR COLLAPSE (Desktop) ===== */
+.sidebar {
+  transition: transform 0.3s ease;
+}
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  body.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+  }
+  body.sidebar-collapsed .main-content {
+    margin-left: 0;
+  }
+}
  
 .hb-drawer-header {
   display: flex;
