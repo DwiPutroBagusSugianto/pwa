@@ -776,7 +776,6 @@ tbody tr:hover td { background: var(--bg-elevated); }
   border: none;
   background: rgba(20, 18, 40, 0.7);
   backdrop-filter: blur(6px);
-  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
