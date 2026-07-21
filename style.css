@@ -782,6 +782,11 @@ tbody tr:hover td { background: var(--bg-elevated); }
   gap: 5px;
   cursor: pointer;
 }
+
+/* Hamburger cuma untuk mobile — di desktop sidebar sudah selalu kelihatan */
+@media (max-width: 768px) {
+  #hb-toggle.visible { display: flex; }
+}
 #hb-toggle.visible { display: flex; }
 #hb-toggle span {
   display: block;
