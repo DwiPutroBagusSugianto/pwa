@@ -1,7 +1,6 @@
 // sw.js — ILG SmartTest offline support
-// Taruh file ini di root repo (sejajar dengan index.html), lalu daftarkan di index.html.
 
-const CACHE_NAME = 'ilg-smarttest-v1.1';
+const CACHE_NAME = 'ilg-smarttest-v1.2';
 const API_BASE = 'https://smart.infotama.net.id/api';
 const DB_NAME = 'ilg-smarttest-offline';
 const QUEUE_STORE = 'pending-results';
@@ -15,7 +14,6 @@ const STATIC_ASSETS = [
   '/pwa/logoilg.jpeg'
 ];
 
-// ---------- IndexedDB kecil, tanpa library, khusus buat antrian submit ----------
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
@@ -106,7 +104,6 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // POST/PUT lain: coba online, kalau gagal biarkan error (bisa dikembangkan lagi kalau perlu)
   e.respondWith(fetch(e.request));
 });
 
@@ -115,11 +112,11 @@ async function handleResultsSubmit(request) {
   const authHeader = request.headers.get('Authorization');
 
   try {
-    // Coba kirim langsung — kalau online, ini akan sukses dan selesai di sini
+
     const res = await fetch(request.clone());
     return res;
   } catch (err) {
-    // Offline: simpan ke antrian, balas app dengan response "pura-pura sukses"
+
     await queueRequest({
       url: request.url,
       method: 'POST',
@@ -128,13 +125,13 @@ async function handleResultsSubmit(request) {
       queuedAt: new Date().toISOString()
     });
 
-    // Coba daftarkan Background Sync (kalau browser support)
+
     try {
       if ('sync' in self.registration) {
         await self.registration.sync.register('sync-results');
       }
     } catch (_) {
-      // Background Sync tidak didukung (mis. Safari/iOS) — akan di-retry lewat event 'online' di halaman
+
     }
 
     return new Response(
@@ -172,14 +169,12 @@ async function syncQueuedResults() {
       });
       if (res.ok) {
         await deleteQueued(item.localId);
-        // beri tahu semua tab yang terbuka supaya bisa refresh UI kalau perlu
         const clientsList = await self.clients.matchAll();
         clientsList.forEach((client) =>
           client.postMessage({ type: 'RESULT_SYNCED', localId: item.localId })
         );
       }
     } catch (_) {
-      // masih offline, coba lagi nanti
       break;
     }
   }
