@@ -769,6 +769,7 @@ tbody tr:hover td { background: var(--bg-elevated); }
   top: 14px;
   left: 14px;
   z-index: 1000;
+  display: none;
   width: 42px;
   height: 42px;
   border-radius: 10px;
@@ -782,6 +783,7 @@ tbody tr:hover td { background: var(--bg-elevated); }
   gap: 5px;
   cursor: pointer;
 }
+#hb-toggle.visible { display: flex; }
 #hb-toggle span {
   display: block;
   width: 20px;
