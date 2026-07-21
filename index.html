@@ -100,6 +100,17 @@
       backdrop.addEventListener('click', closeDrawer);
  
       buildMenu();
+      function updateVisibility() {
+        var loggedIn = !!document.querySelector('#app .sidebar');
+        toggleBtn.classList.toggle('visible', loggedIn);
+        if (!loggedIn) closeDrawer(); // auto-tutup drawer kalau balik ke login (misal logout)
+      }
+      
+      var appEl = document.getElementById('app');
+      if (appEl) {
+        new MutationObserver(updateVisibility).observe(appEl, { childList: true, subtree: true });
+      }
+      updateVisibility(); // cek langsung saat pertama load
     })();
   </script>
  
