@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ILG SmartTest — Sistem Kuis Karyawan</title>
- 
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700&display=swap" rel="stylesheet" />
@@ -13,15 +13,15 @@
   <link rel="stylesheet" href="style-modern-saas-2025.css">
 </head>
 <body>
- 
+
   <!-- ==== HAMBURGER MENU ==== -->
   <div id="hb-overlay">
     <button id="hb-toggle" aria-label="Buka menu">
       <span></span><span></span><span></span>
     </button>
- 
+
     <div id="hb-backdrop"></div>
- 
+
     <nav id="hb-drawer">
       <div class="hb-drawer-header">
         <img src="logoilg.jpeg" alt="Logo" class="hb-logo" />
@@ -31,9 +31,9 @@
     </nav>
   </div>
   <!-- ==== END HAMBURGER MENU ==== -->
- 
+
   <div id="app"></div>
- 
+
   <script>
     // Sesuaikan daftar ini dengan teks tombol nav yang SUDAH ADA di app Anda.
     // 'match' = teks yang dicari di tombol/link nav yang dirender bundle1.min.js.
@@ -44,13 +44,13 @@
       { label: 'Hasil Saya', match: 'Hasil Saya' },
       { label: 'Keluar', match: 'Keluar' }
     ];
- 
+
     (function () {
       var toggleBtn = document.getElementById('hb-toggle');
       var drawer = document.getElementById('hb-drawer');
       var backdrop = document.getElementById('hb-backdrop');
       var list = document.getElementById('hb-menu-list');
- 
+
       function buildMenu() {
         list.innerHTML = '';
         MENU_ITEMS.forEach(function (item) {
@@ -67,7 +67,7 @@
           list.appendChild(li);
         });
       }
- 
+
       // Cari elemen nav yang SUDAH dirender oleh bundle1.min.js berdasarkan
       // teksnya, lalu "klik" elemen itu — supaya routing SPA yang sudah ada tetap dipakai.
       function triggerExistingNav(matchText) {
@@ -82,7 +82,7 @@
         }
         console.warn('[hamburger] Tombol nav dengan teks "' + matchText + '" tidak ditemukan di halaman ini.');
       }
- 
+
       function openDrawer() {
         drawer.classList.add('open');
         backdrop.classList.add('show');
@@ -93,34 +93,36 @@
         backdrop.classList.remove('show');
         toggleBtn.classList.remove('open');
       }
- 
+
       toggleBtn.addEventListener('click', function () {
         drawer.classList.contains('open') ? closeDrawer() : openDrawer();
       });
       backdrop.addEventListener('click', closeDrawer);
 
+      // Hamburger cuma muncul setelah login (saat sidebar sudah dirender App).
+      // Karena app ini SPA yang me-render ulang #app, kita pantau perubahannya.
       function updateVisibility() {
         var loggedIn = !!document.querySelector('#app .sidebar');
         toggleBtn.classList.toggle('visible', loggedIn);
         if (!loggedIn) closeDrawer(); // auto-tutup drawer kalau balik ke login (misal logout)
       }
-      
+
       var appEl = document.getElementById('app');
       if (appEl) {
         new MutationObserver(updateVisibility).observe(appEl, { childList: true, subtree: true });
       }
       updateVisibility(); // cek langsung saat pertama load
- 
+
       buildMenu();
     })();
   </script>
- 
+
   <script src="bundle1.min.js"></script>
- 
+
   <footer class="site-footer">
     Copyright &copy; 2026 Infotama Lintas Global &mdash; All rights reserved.
   </footer>
- 
+
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/pwa/sw.js');
@@ -132,6 +134,6 @@
       });
     });
   </script>
- 
+
 </body>
 </html>
