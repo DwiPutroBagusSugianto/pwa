@@ -96,11 +96,9 @@
 
       toggleBtn.addEventListener('click', function () {
         if (window.innerWidth > 768) {
-          // Desktop: collapse/expand sidebar asli, bukan buka drawer overlay
           document.body.classList.toggle('sidebar-collapsed');
           toggleBtn.classList.toggle('open');
         } else {
-          // Mobile: tetap pakai drawer overlay seperti biasa
           drawer.classList.contains('open') ? closeDrawer() : openDrawer();
         }
       });
